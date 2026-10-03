@@ -2,7 +2,7 @@
 # START: 10/2/26
 # LAST UPDATED: 5/5/26
 
-## STUPID VENV - fuckass commands
+## VENV -  commands
 # python3 -m venv venv
 # source venv/bin/activate
 # ./path/to/venv/bin/python main.py
