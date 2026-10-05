@@ -3,15 +3,16 @@
 # LAST UPDATED: 5/5/26
 
 ## VENV -  commands
-# python3 -m venv venv
-# source venv/bin/activate
-# ./path/to/venv/bin/python main.py
+# python3.13 -m venv venv313
+# source venv313/bin/activate
+# ./venv313/bin/python main.py
 
 
 
 # IMPORTS
 import pygame
 import sys
+
 import random
 import textwrap
 import os
@@ -27,7 +28,7 @@ async def main ():
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 600
 
-    GROUND = 400
+    GROUND = 450
 
     # Physics & Mechanics
     GRAVITY = 1
@@ -54,6 +55,7 @@ async def main ():
     coin_count = 1
     coin_collected = False
     order = 0
+    is_yes = None
 
 # SET UP
 
@@ -71,28 +73,27 @@ async def main ():
 
 
     # Font
-    # font = pygame.font.Font('nokiafc22.ttf', 24)
+    font = pygame.font.Font('nokiafc22.ttf', 24)
 
 
 # BACKGROUND
     def background():
     # Ground
-        pygame.draw.rect(screen, FLOOR_COLOR, (0, GROUND, SCREEN_WIDTH, 200))
+        pygame.draw.rect(screen, FLOOR_COLOR, (0, GROUND, SCREEN_WIDTH, 150))
 
 
 # TEXT
 
-   # def draw_text(text, x, y, color=FONT_COLOR):
-         #   img = font.render(text, True, color)
-         #   screen.blit(img, (x, y))
+    def draw_text(text, x, y, color=FONT_COLOR):
+        img = font.render(text, True, color)
+        screen.blit(img, (x, y))
 
-   # def wrap(surface, text, sfont, color, x, y, max_width):
-                # Split text into lines that fit within max_width
-        #        wrapped_lines = textwrap.wrap(text, width=max_width // (sfont.size(' ')[0] // 2))
+    def wrap(surface, text, sfont, color, x, y, max_width):
+        wrapped_lines = textwrap.wrap(text, width=max_width // (sfont.size(' ')[0] // 2))
 
-        #        for i, line in enumerate(wrapped_lines):
-        #            line_surf = sfont.render(line, True, color)
-          #          surface.blit(line_surf, (x, y + i * sfont.get_height()))
+        for i, line in enumerate(wrapped_lines):
+            line_surf = sfont.render(line, True, color)
+            surface.blit(line_surf, (x, y + i * sfont.get_height()))
 
 
 # PLAYER
@@ -160,8 +161,8 @@ async def main ():
         return coin
 
     # Display Count
-   # def count(count):
-       # draw_text(f"Coins: {count}", 25, 25)
+    def count(count):
+        draw_text(f"Coins: {count}", 25, 25)
 
 
 # PHONE BOOTH 
@@ -174,15 +175,16 @@ async def main ():
 
 
 
+
 # LEVEL / SCENES
 
     # 0 - Phone Call / Home 
 
-    # 1 - Maneuver  
+    # 1 -   
 
-    # 2 - Enemy
+    # 2 - 
 
-    # 3 - Maze
+    # 3 - 
 
     # 4 - Final
 
@@ -205,7 +207,7 @@ async def main ():
             print("Do you need help?")
     # 4 - You’ve reached the end of the line…
         elif order == 4: 
-            print("You’ve reached the end of the line...")
+            print("You've reached the end of the line...")
     # Ending 1 
 
     # Ending 2
@@ -220,16 +222,11 @@ async def main ():
         screen.fill(BG_COLOR)
         background()
         player()
-     #   count(coin_count)
+        count(coin_count)
         if not coin_collected: 
             coin = gen_coin()
 
         draw_phonebooth()
-
-        pygame.display.flip()
-        clock.tick(60)
-
-        await asyncio.sleep(0)
 
 
     # Check Events
@@ -237,6 +234,18 @@ async def main ():
             if event.type == pygame.QUIT:
                 pygame.quit() 
                 sys.exit() 
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # Get the (x, y) position of the mouse click
+                mouse_pos = event.pos
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_y:
+                    is_yes = True
+                if event.key == pygame.K_n:
+                    is_yes = False
+
+                
 
 
     # MOVE
@@ -257,16 +266,28 @@ async def main ():
 
         if coin_count > 0:        
             if player().colliderect(draw_phonebooth()):
-                insert = input("Use Coin? Y/N: ")
-                if insert == "Y":
-                    coin_count = use_coin(coin_count)
-                    print(f"COIN: ", coin_count)
-                    phonebooth(order)
-                else:
-                    x -= 10
+                pygame.draw.rect(screen, FLOOR_COLOR, (325, 200, 200, 100))
+                draw_text("Use Coin?", 360, 210)
+                draw_text("Yes", 350, 260)
+                draw_text("No", 460, 260)
 
+                if is_yes == True:
+                    coin_count = use_coin(coin_count)
+                    phonebooth(order)
+                    is_yes = None
+                elif is_yes == False:
+                    x = 640
+                    is_yes = None
+                
             
+
+
+
+
+        pygame.display.flip()
+        clock.tick(60)
                     
+        await asyncio.sleep(0)
 
 
 
