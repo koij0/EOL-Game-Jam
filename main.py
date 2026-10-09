@@ -3,7 +3,7 @@
 # LAST UPDATED: 5/5/26
 
 ## VENV -  commands
-# python3.13 -m venv venv313
+# python3.13 -m venv venv313 
 # source venv313/bin/activate
 # ./venv313/bin/python main.py
 
@@ -53,6 +53,7 @@ async def main ():
 
 
 
+
 # INITIALIZATION
 
     x = 300
@@ -63,6 +64,8 @@ async def main ():
     coin_collected = False
     order = 0
     is_yes = None
+
+    scene = 0
 
     x_rope = 350
     y_rope = 100
@@ -147,7 +150,7 @@ async def main ():
         
     
 # PHYSICS
-    def physics(velocity, x_loc, y_loc, grounded):
+    def physics(velocity, x_loc, y_loc, grounded, scene):
         # Gravity
 
         velocity += GRAVITY
@@ -158,16 +161,18 @@ async def main ():
         if y_loc > GROUND - 50:
             y_loc = GROUND - 50
             grounded = True
-                   
+                 
 
         # Boundaries
         if x_loc < 0: 
             x_loc = SCREEN_WIDTH - 50 # Scene Shifting... 50 is just for my square
-            # SCENE -= 1
+            if scene > 0:
+                scene -= 1
         elif x_loc > SCREEN_WIDTH:
             x_loc = 0
-            # SCENE += 1
-        return grounded, x_loc, y_loc
+            if scene < 18:
+                scene += 1
+        return grounded, x_loc, y_loc, scene
 
 
 # ROPE
@@ -247,16 +252,57 @@ async def main ():
 
 
 # LEVEL / SCENES
-
+    def get_scene(scene):
     # 0 - Phone Call / Home 
 
-    # 1 -   
+        if scene == 0:
+            print("SCENE: ", scene)
+        elif scene == 1:
+            print("SCENE: ", scene)
+        elif scene == 2:
+            print("SCENE: ", scene)
+        elif scene == 3:
+            print("SCENE: ", scene)
 
-    # 2 - 
+        # 1 -   
 
-    # 3 - 
+        elif scene == 4:
+            print("SCENE: ", scene)
+        elif scene == 5:
+            print("SCENE: ", scene)
+        elif scene == 6:
+            print("SCENE: ", scene)
+        elif scene == 7:
+            print("SCENE: ", scene)
+        # 2 - 
 
-    # 4 - Final
+        elif scene == 8:
+            print("SCENE: ", scene)
+        elif scene == 9:
+            print("SCENE: ", scene)
+        elif scene == 10:
+            print("SCENE: ", scene)
+        elif scene == 11:
+            print("SCENE: ", scene)
+
+        # 3 - 
+
+        elif scene == 12:
+            print("SCENE: ", scene)
+        elif scene == 13:
+            print("SCENE: ", scene)
+        elif scene == 14:
+            print("SCENE: ", scene)
+        elif scene == 15:
+            print("SCENE: ", scene)
+        # 4 - Final
+
+        elif scene == 16:
+            print("SCENE: ", scene)
+        elif scene == 17:
+            print("SCENE: ", scene)
+        elif scene == 18:
+            print("SCENE: ", scene)
 
 
 # PHONE BOOTH CUT-SCENES
@@ -288,19 +334,7 @@ async def main ():
 # MAIN GAME LOOP
     while True:
 
-        # Initial Setup
-        # screen.fill(BG_COLOR)
-        screen.blit(bg, (0,0))
-        ground()
-        player()
-        count(coin_count)
-        if not coin_collected: 
-            coin = gen_coin()
-
-        draw_phonebooth()
-
-
-    # Check Events
+# Check Events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit() 
@@ -315,72 +349,73 @@ async def main ():
                 rope_points[0][2] = mouse_x
                 rope_points[0][3] = mouse_y
                 
-
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_y:
                     is_yes = True
                 if event.key == pygame.K_n:
                     is_yes = False
-                
+                        
+        # Initial Setup
+        # screen.fill(BG_COLOR)
+
+        if is_yes == None:
+            screen.blit(bg, (0,0))
+            get_scene(scene)
+            ground()
+            player()
+            count(coin_count)
+            if not coin_collected: 
+                coin = gen_coin()
+
+            rope(rope_points)
+
+        # MOVE
+            keys = pygame.key.get_pressed()
+            grounded, x, y = player_move(x, y, grounded, keys, touch_rope, rope_points)
+            grounded, x, y, scene = physics(velocity, x, y, grounded, scene)
+            player()
 
 
-        rope(rope_points)
-                
+     # COLLISIONS
 
+            if len(coin) > 0: ## FIX 
+                if player().colliderect(coin[0]):
+                    coin_count = get_coin(coin_count)
+                    coin_collected = True
+                    print(f"COIN: ", coin_count)
+                    coin.remove(coin[0])
 
-    # MOVE
-        keys = pygame.key.get_pressed()
-        grounded, x, y = player_move(x, y, grounded, keys, touch_rope, rope_points)
-        grounded, x, y = physics(velocity, x, y, grounded)
-        player()
+            if scene == 7 or scene == 11 or scene == 15:
+                draw_phonebooth()
+                if coin_count > 0:        
+                    if player().colliderect(draw_phonebooth()):
+                        pygame.draw.rect(screen, FLOOR_COLOR, (300, 200, 200, 100)) 
+                        draw_text("Use Coin?", 335, 210) 
+                        draw_text("Yes", 325, 260) 
+                        draw_text("No", 434, 260) 
 
+            # Rope hits ground/platforms/etc
+            for i in range(len(rope_points)):
+                if ground().collidepoint(rope_points[i][0], rope_points[i][1]):
+                    rope_points[i][1] = ground().top
 
-    # COLLISIONS
+            # Grab Rope
+            for i in range(len(rope_points) - 1):
+                start_point = (rope_points[i][0], rope_points[i][1])
+                end_point = (rope_points[i+1][0], rope_points[i+1][1])
 
-        if len(coin) > 0: ## FIX 
-            if player().colliderect(coin[0]):
-                coin_count = get_coin(coin_count)
-                coin_collected = True
-                print(f"COIN: ", coin_count)
-                coin.remove(coin[0])
+                if player().clipline(start_point, end_point):
+                    touch_rope = True
+                    break
+                else:
+                    touch_rope = False
 
-        if coin_count > 0:        
-            if player().colliderect(draw_phonebooth()):
-                pygame.draw.rect(screen, FLOOR_COLOR, (300, 200, 200, 100)) 
-                draw_text("Use Coin?", 335, 210) 
-                draw_text("Yes", 325, 260) 
-                draw_text("No", 434, 260) 
-
-                if is_yes == True:
-                    coin_count = use_coin(coin_count)
-                    phonebooth(order)
-                    is_yes = None
-                elif is_yes == False:
-                    x = 640
-                    is_yes = None
-
-        # Rope hits ground/platforms/etc
-        for i in range(len(rope_points)):
-            if ground().collidepoint(rope_points[i][0], rope_points[i][1]):
-                rope_points[i][1] = ground().top
-
-        # Grab Rope
-        for i in range(len(rope_points) - 1):
-            start_point = (rope_points[i][0], rope_points[i][1])
-            end_point = (rope_points[i+1][0], rope_points[i+1][1])
-
-            if player().clipline(start_point, end_point):
-                touch_rope = True
-                break
-            else:
-                touch_rope = False
-
-        
-        
-            
-
-            
-
+        elif is_yes == True:
+            coin_count = use_coin(coin_count)
+            phonebooth(order)
+        elif is_yes == False:
+            x = 640
+            is_yes = None
 
 
 
