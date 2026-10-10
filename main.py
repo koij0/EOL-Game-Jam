@@ -32,15 +32,15 @@ async def main ():
 
     # Physics & Mechanics
     GRAVITY = 1
-    FALL = 4
+    FALL = 5
     PLAYER_SPEED = 5
-    JUMP_FORCE = -20
+    JUMP_FORCE = -25
     LEVEL_WIDTH = 5000  
 
     # Rope
-    SEGMENTS = 10
+    SEGMENTS = 8
     SEGMENT_LENGTH = 30
-    AIR = 0.85
+    AIR = 0.96
     ITERATIONS = 5
 
     # Colors 
@@ -59,7 +59,8 @@ async def main ():
 
     x = 300
     y = 350
-    velocity = 0
+    y_velocity = 0
+    x_velocity = 0
     grounded = True
     jumped = False
     coin_count = 1
@@ -156,25 +157,28 @@ async def main ():
                         y_loc = rope_points[0][1] + 5
                 elif keys[pygame.K_RIGHT] or keys[pygame.K_LEFT]:
                     swing = True
+                if swing == True:
                     y_loc = rope_points[-1][1] - 22
             else:
                 swing = False
+
         return grounded, x_loc, y_loc, swing, jumped
         
         
     
 # PHYSICS
-    def physics(velocity, x_loc, y_loc, grounded, jumped, scene, touch_rope):
+    def physics(x_velocity, y_velocity, x_loc, y_loc, grounded, jumped, scene, touch_rope, angle):
         # Gravity
-        if velocity < 0 or jumped == True: 
-            velocity += GRAVITY
-          # print("Gravity")
+        if jumped == True: 
+            y_velocity += GRAVITY
         elif (touch_rope == False or (not keys[pygame.K_SPACE] and touch_rope == True)): 
-           # print("FALL")
-            velocity += FALL
+            #print("FALL")
+            y_velocity += FALL
 
-        y_loc += velocity
-        velocity = 0
+        y_loc += y_velocity
+        x_loc += x_velocity
+        x_velocity = 0
+        y_velocity = 0
 
         # Ground
         if y_loc > GROUND - 50:
@@ -182,8 +186,6 @@ async def main ():
             grounded = True
             jumped = False
             
-            
-             
 
         # Boundaries
         if x_loc < 0: 
@@ -194,41 +196,46 @@ async def main ():
             x_loc = 0
             if scene < 18:
                 scene += 1
-        return grounded, x_loc, y_loc, scene, velocity, jumped
+        return grounded, x_loc, y_loc, scene, x_velocity, y_velocity, jumped
 
 
 # ROPE
-    def rope(rope_points, angle, angle_velocity, swing):
+    def rope(rope_points, angle, angle_velocity, swing, x_velocity, y_velocity):
         # Update points
-        for i in rope_points[1:]:
-            vx = (i[0] - i[2]) * AIR
-            vy = (i[1] - i[3]) * AIR
-            i[2] = i[0]
-            i[3] = i[1]
-            i[0] += vx
-            i[1] += vy + GRAVITY
+        if swing == False:
+            for i in rope_points[1:]:
+                vx = (i[0] - i[2]) * AIR
+                vy = (i[1] - i[3]) * AIR
+                i[2] = i[0]
+                i[3] = i[1]
+                i[0] += vx
+                i[1] += vy + GRAVITY
+
+
+        if swing == True:
+            angle_acceleration = (- GRAVITY / (SEGMENT_LENGTH * SEGMENTS)) * math.sin(angle)
+            if keys[pygame.K_LEFT]:
+                angle_acceleration -= 0.003
+            if keys[pygame.K_RIGHT]:
+                angle_acceleration += 0.003
+                
+            angle_velocity = max(-0.1, min(0.1, angle_velocity))
+            angle_velocity += angle_acceleration 
+            angle_velocity *= AIR 
+           # y_velocity = - angle_velocity * (SEGMENT_LENGTH * SEGMENTS) * math.sin(angle)
+           # x_velocity = angle_velocity * (SEGMENT_LENGTH * SEGMENTS) * math.cos(angle)
+            angle += angle_velocity         
 
         # Constraints
         for i in range(ITERATIONS):
             if swing == True:
-
-                angle_acceleration = (-GRAVITY / (SEGMENT_LENGTH * SEGMENTS)) * math.sin(angle)
-                if keys[pygame.K_LEFT]:
-                    angle_acceleration -= 0.01
-                if keys[pygame.K_RIGHT]:
-                    angle_acceleration += 0.01
-                
-                angle_velocity = max(-0.1, min(0.1, angle_velocity))
-                angle_velocity += angle_acceleration 
-                angle_velocity *= AIR 
-                angle += angle_velocity 
-
                 for j in range(len(rope_points) - 1):
 
                     distance = SEGMENT_LENGTH * j 
 
                     rope_points[j+1][0] = rope_points[0][0] + distance * math.sin(angle)
                     rope_points[j+1][1] = rope_points[0][1] + distance * math.cos(angle)
+                
             else:
                 for j in range(len(rope_points) - 1):
                     p1 = rope_points[j]
@@ -247,15 +254,15 @@ async def main ():
                         p1[1] -= offset_y
                     p2[0] += offset_x
                     p2[1] += offset_y
-
+                
         # Draw
         for i in range(len(rope_points) - 1):
             pygame.draw.line(screen, (255, 223, 0), (rope_points[i][0], rope_points[i][1]), (rope_points[i+1][0], rope_points[i+1][1]), 5)
         for i in rope_points:
             pygame.draw.circle(screen, (229, 184, 11), (int(i[0]), int(i[1])), 4)
         pygame.draw.circle(screen, (229, 185, 11), (int(rope_points[0][0]), int(rope_points[0][1])), 10)
-
-
+        
+        return angle, angle_velocity, x_velocity, y_velocity
 
 
 
@@ -411,12 +418,12 @@ async def main ():
             if not coin_collected: 
                 coin = gen_coin()
 
-            rope(rope_points, angle, angle_velocity, swing)
+            angle, angle_velocity, x_velocity, y_velocity = rope(rope_points, angle, angle_velocity, swing, x_velocity, y_velocity)
 
         # MOVE
             keys = pygame.key.get_pressed()
             grounded, x, y, swing, jumped = player_move(x, y, grounded, keys, touch_rope, rope_points, swing, jumped)
-            grounded, x, y, scene, velocity, jumped = physics(velocity, x, y, grounded, jumped, scene, touch_rope)
+            grounded, x, y, scene, x_velocity, y_velocity, jumped = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope, angle)
             player()
 
 
@@ -451,7 +458,6 @@ async def main ():
                     touch_rope = True
                     break
                 else:
-
                     touch_rope = False
 
         elif is_yes == True:
