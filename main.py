@@ -25,10 +25,10 @@ async def main ():
 # CONFIGURATIONS
 
     # Screen configurations
-    SCREEN_WIDTH = 800
-    SCREEN_HEIGHT = 600
+    SCREEN_WIDTH = 600  # SCREEN_WIDTH = 800
+    SCREEN_HEIGHT = 800 # SCREEN_HEIGHT = 600
 
-    GROUND = 450
+    GROUND = 650
 
     # Physics & Mechanics
     GRAVITY = 1
@@ -52,13 +52,10 @@ async def main ():
 
 
 
-
-
-
 # INITIALIZATION
 
-    x = 300
-    y = 350
+    x = 325 # x = 300
+    y = 50 # y = 350
     y_velocity = 0
     x_velocity = 0
     grounded = True
@@ -95,7 +92,7 @@ async def main ():
 
     # Art
     bg = pygame.image.load("background.png").convert_alpha()
-    bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT-150))
+    bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 
 
@@ -112,6 +109,13 @@ async def main ():
         ground = pygame.Rect((0, GROUND, SCREEN_WIDTH, 150))
         pygame.draw.rect(screen, FLOOR_COLOR, ground)
         return ground
+
+    def walls():
+        wall1 = pygame.Rect((0, 0, 10, SCREEN_HEIGHT))
+        wall2 = pygame.Rect((SCREEN_WIDTH - 10, 0, 10, SCREEN_HEIGHT))
+        pygame.draw.rect(screen, FLOOR_COLOR, wall1)
+        pygame.draw.rect(screen, FLOOR_COLOR, wall2)
+        return wall1, wall2
 
 
 # TEXT
@@ -180,20 +184,26 @@ async def main ():
         x_velocity = 0
         y_velocity = 0
 
-        # Ground
-        if y_loc > GROUND - 50:
-            y_loc = GROUND - 50
-            grounded = True
-            jumped = False
-            
-
         # Boundaries
-        if x_loc < 0: 
-            x_loc = SCREEN_WIDTH - 50 # Scene Shifting... 50 is just for my square
-            if scene > 0:
-                scene -= 1
-        elif x_loc > SCREEN_WIDTH:
-            x_loc = 0
+
+        # Wall
+        if x_loc < 10:
+            x_loc = 10
+        elif x_loc > SCREEN_WIDTH - 60:
+            x_loc = SCREEN_WIDTH - 60
+            
+        
+
+        # Ground
+        if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 18:
+            if y_loc > GROUND - 50:
+                y_loc = GROUND - 50
+                grounded = True
+                jumped = False
+            
+        # Falling        
+        if y_loc > SCREEN_HEIGHT:  
+            y_loc = 0 
             if scene < 18:
                 scene += 1
         return grounded, x_loc, y_loc, scene, x_velocity, y_velocity, jumped
@@ -295,7 +305,7 @@ async def main ():
 
     # Sprite Rendering
     def draw_phonebooth():
-        phonebooth = pygame.Rect(700, GROUND - 100, 75, 100)
+        phonebooth = pygame.Rect(500, GROUND - 100, 75, 100)
         pygame.draw.rect(screen, PLAYER_COLOR, phonebooth)
         return phonebooth
 
@@ -412,7 +422,9 @@ async def main ():
         if is_yes == None:
             screen.blit(bg, (0,0))
             get_scene(scene)
-            ground()
+            walls()
+            if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 18:
+                ground()
             player()
             count(coin_count)
             if not coin_collected: 
@@ -435,19 +447,19 @@ async def main ():
                     coin_collected = True
                     coin.remove(coin[0])
 
-            if scene == 7 or scene == 11 or scene == 15:
+            if scene == 3 or scene == 7 or scene == 11 or scene == 15:
                 draw_phonebooth()
                 if coin_count > 0:        
                     if player().colliderect(draw_phonebooth()):
-                        pygame.draw.rect(screen, FLOOR_COLOR, (300, 200, 200, 100)) 
-                        draw_text("Use Coin?", 335, 210) 
-                        draw_text("Yes", 325, 260) 
-                        draw_text("No", 434, 260) 
+                        pygame.draw.rect(screen, FLOOR_COLOR, (200, 400, 200, 100))  
+                        draw_text("Use Coin?", 235, 410) 
+                        draw_text("Yes", 225, 460) 
+                        draw_text("No", 334, 460) 
 
             # Rope hits ground/platforms/etc
-            for i in range(len(rope_points)):
-                if ground().collidepoint(rope_points[i][0], rope_points[i][1]):
-                    rope_points[i][1] = ground().top
+            # for i in range(len(rope_points)):
+                # if ground().collidepoint(rope_points[i][0], rope_points[i][1]):
+                    # rope_points[i][1] = ground().top
 
             # Grab Rope
             for i in range(len(rope_points) - 1):
@@ -463,8 +475,9 @@ async def main ():
         elif is_yes == True:
             coin_count = use_coin(coin_count)
             phonebooth(order)
+            scene += 1
         elif is_yes == False:
-            x = 640
+            x = 440
             is_yes = None
 
 
