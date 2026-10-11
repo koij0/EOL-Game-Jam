@@ -38,7 +38,7 @@ async def main ():
     LEVEL_WIDTH = 5000  
 
     # Rope
-    SEGMENTS = 8
+    SEGMENTS = 5
     SEGMENT_LENGTH = 30
     AIR = 0.93
     ITERATIONS = 5
@@ -175,7 +175,7 @@ async def main ():
                 if keys[pygame.K_RIGHT] or keys[pygame.K_LEFT]:
                     swing = True
                     y_loc = rope_points[-1][1] - 22
-                    
+
                 else:
                     swing = False
 
@@ -359,10 +359,20 @@ async def main ():
 
 # LEVEL / SCENES
     def get_scene(scene):
+        barriers = []
+        platforms = []
     # 0 - Phone Call / Home 
 
         if scene == 0:
-            scene = 0
+            barriers.append(pygame.Rect(0, 400, 200, 10))
+            barriers.append(pygame.Rect(400, 400, 200, 10))
+            platforms.append(pygame.Rect(300, 100, 100, 10))
+
+            for barrier in barriers:
+                pygame.draw.rect(screen, (255, 0, 0), barrier)
+
+            for platform in platforms:
+                pygame.draw.rect(screen, (0, 255, 0), platform)
         elif scene == 1:
             scene = 1
         elif scene == 2:
@@ -409,6 +419,8 @@ async def main ():
             print("SCENE: ", scene)
         elif scene == 18:
             print("SCENE: ", scene)
+
+        return barriers, platforms
 
 
 # PHONE BOOTH CUT-SCENES
@@ -472,7 +484,7 @@ async def main ():
 
         if is_yes == None:
             screen.blit(bg, (0,0))
-            get_scene(scene)
+            barriers, platforms = get_scene(scene)
             walls()
 
             if scene == 18: #== 3 or scene == 7 or scene == 11 or scene == 15 or scene == 18:
@@ -517,6 +529,20 @@ async def main ():
                         draw_text("Use Coin?", 235, 410) 
                         draw_text("Yes", 225, 460) 
                         draw_text("No", 334, 460) 
+
+
+        # Barriers    
+            for barrier in barriers:
+                if player().colliderect(barrier):
+                    # lives -= 1
+                    print("HIT BARRIER")
+                        
+
+        # Platforms
+            for platform in platforms:
+                if player().colliderect(platform):
+                    grounded = True
+                    y = platform.y - 52
 
                            
            
