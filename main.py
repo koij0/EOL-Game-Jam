@@ -65,7 +65,10 @@ async def main ():
     order = 0
     is_yes = None
 
+    lives = 9
+
     scene = 0
+    time = 3
 
     x_rope = 350
     y_rope = 100
@@ -141,7 +144,8 @@ async def main ():
 
 
 # MOVEMENT
-    def player_move(x_loc, y_loc, grounded, keys, touch_rope, rope_points, swing, jumped):
+    def player_move(x_loc, y_loc, grounded, keys, touch_rope, rope_points, swing, jumped, dt, time):
+
         if keys[pygame.K_LEFT]:
             x_loc -= PLAYER_SPEED
         if keys[pygame.K_RIGHT]:
@@ -150,39 +154,57 @@ async def main ():
             y_loc += JUMP_FORCE
             grounded = False
             jumped = True
-        if touch_rope == True:
-            if keys[pygame.K_SPACE]: 
-                jumped = False
+
+        if touch_rope == True and keys[pygame.K_SPACE]: 
+            time -= dt
+            jumped = False
+
+            if time <= 0:
+                y_loc = rope_points[-1][1] + 10
+                touch_rope = False
+                swing = False
+                time = 0 
+
+            else:
                 x_loc = rope_points[-1][0] - 22
+
                 if keys[pygame.K_UP]:
                     swing = False
                     y_loc -= (PLAYER_SPEED / 2)
+
                     if y_loc < rope_points[0][1] + 5:
                         y_loc = rope_points[0][1] + 5
+
                 elif keys[pygame.K_RIGHT] or keys[pygame.K_LEFT]:
                     swing = True
-                if swing == True:
                     y_loc = rope_points[-1][1] - 22
-            else:
-                swing = False
+                else:
+                    swing = False
+        else:
+            swing = False
 
-        return grounded, x_loc, y_loc, swing, jumped
+        return grounded, x_loc, y_loc, swing, jumped, time
         
         
     
 # PHYSICS
-    def physics(x_velocity, y_velocity, x_loc, y_loc, grounded, jumped, scene, touch_rope, angle):
+    def physics(x_velocity, y_velocity, x_loc, y_loc, grounded, jumped, scene, touch_rope, keys, angle):
+        
         # Gravity
-        if jumped == True: 
-            y_velocity += GRAVITY
-        elif (touch_rope == False or (not keys[pygame.K_SPACE] and touch_rope == True)): 
-            #print("FALL")
-            y_velocity += FALL
+        attached = touch_rope and keys[pygame.K_SPACE]
+        if not attached:
+            if jumped == True: 
+                y_velocity += GRAVITY
+            elif (touch_rope == False or (not keys[pygame.K_SPACE] and touch_rope == True)): 
+                #print("FALL")
+                y_velocity += FALL
 
-        y_loc += y_velocity
-        x_loc += x_velocity
+            y_loc += y_velocity
+            x_loc += x_velocity
+
         x_velocity = 0
         y_velocity = 0
+
 
         # Boundaries
 
@@ -190,9 +212,7 @@ async def main ():
         if x_loc < 10:
             x_loc = 10
         elif x_loc > SCREEN_WIDTH - 60:
-            x_loc = SCREEN_WIDTH - 60
-            
-        
+            x_loc = SCREEN_WIDTH - 60 
 
         # Ground
         if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 18:
@@ -274,8 +294,7 @@ async def main ():
         
         return angle, angle_velocity, x_velocity, y_velocity
 
-
-
+        
 
 # COINS
 
@@ -319,11 +338,11 @@ async def main ():
         if scene == 0:
             scene = 0
         elif scene == 1:
-            print("SCENE: ", scene)
+            scene = 1
         elif scene == 2:
-            print("SCENE: ", scene)
+            scene = 2
         elif scene == 3:
-            print("SCENE: ", scene)
+            scene = 3
 
         # 1 -   
 
@@ -372,7 +391,7 @@ async def main ():
         screen.fill((0, 0, 0))
     # Intro 
         if order == 0: 
-            print("INTRO")
+            draw_text("INTRO", 250, 400)
     # 1 - “Have you had thoughts about how you might do this?” 
         elif order == 1: 
             print("Have you had thoughts about how you might do this?")
@@ -394,6 +413,7 @@ async def main ():
 
 # MAIN GAME LOOP
     while True:
+        dt = clock.tick(60) / 1000
 
 # Check Events
         for event in pygame.event.get():
@@ -434,8 +454,8 @@ async def main ():
 
         # MOVE
             keys = pygame.key.get_pressed()
-            grounded, x, y, swing, jumped = player_move(x, y, grounded, keys, touch_rope, rope_points, swing, jumped)
-            grounded, x, y, scene, x_velocity, y_velocity, jumped = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope, angle)
+            grounded, x, y, swing, jumped, time = player_move(x, y, grounded, keys, touch_rope, rope_points, swing, jumped, dt, time)
+            grounded, x, y, scene, x_velocity, y_velocity, jumped = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope, keys, angle)
             player()
 
 
@@ -462,20 +482,26 @@ async def main ():
                     # rope_points[i][1] = ground().top
 
             # Grab Rope
+            rope_collision = False
             for i in range(len(rope_points) - 1):
                 start_point = (rope_points[i][0], rope_points[i][1])
                 end_point = (rope_points[i+1][0], rope_points[i+1][1])
 
                 if player().clipline(start_point, end_point):
-                    touch_rope = True
+                    rope_collision = True
                     break
-                else:
-                    touch_rope = False
+
+            if rope_collision == True:
+                if touch_rope == False and not keys[pygame.K_SPACE]:
+                    time = 3
+                    touch_rope = True
+            else:
+                touch_rope = False
 
         elif is_yes == True:
             coin_count = use_coin(coin_count)
-            phonebooth(order)
             scene += 1
+            phonebooth(order)
         elif is_yes == False:
             x = 440
             is_yes = None
@@ -483,7 +509,7 @@ async def main ():
 
 
         pygame.display.flip()
-        clock.tick(60)
+        
                     
         await asyncio.sleep(0)
 
