@@ -91,6 +91,14 @@ async def main ():
     buttons.append(pygame.Rect(250, 500, 100, 100))
 
     mouse_pos = (0, 0)
+
+    call = None
+    flash_timer = None
+    sequence = [7, 9, 9, 1, 6, 2, 7, 1, 4, 4]
+    s = 0
+    seq_played = False
+    
+    
     
 
 
@@ -370,6 +378,100 @@ async def main ():
         for button in buttons:
             pygame.draw.rect(screen, (0, 0, 255), button)
 
+    # Phone sequence
+    def phone_sequence(sequence, current_time):
+        flash_timer = {
+            'sequence': sequence,
+            'step': 0,
+            'color': (0, 225, 0),
+            'start_time': current_time,
+            'duration': 500
+            }
+
+        return flash_timer
+
+
+    # Dial
+    def dial(buttons, sequence, mouse_pos, s, flash_timer):
+        current_time = pygame.time.get_ticks()
+    
+        for i, button in enumerate(buttons):
+            if button.collidepoint(mouse_pos):
+                if s < len(sequence) and i == sequence[s]:
+                    s += 1
+                    flash_timer = {
+                        'index': i,
+                        'color': (0, 255, 0),
+                        'start_time': current_time,
+                        'duration': 300
+                    }
+
+                    if s >= len(sequence):
+                        return s, flash_timer, True
+
+                    return s, flash_timer, None
+
+                flash_timer = {
+                    'index': i,
+                    'color': (255, 0, 0),
+                    'start_time': current_time,
+                    'duration': 1000,
+                    'wrong': True
+                }
+
+                return s, flash_timer, False    
+                    
+        return s, flash_timer, None
+
+    # Flash 
+    def flash(flash_timer, current_time, buttons):
+        if not flash_timer:
+            return None
+
+        elapsed = current_time - flash_timer['start_time']
+    
+        if 'index' in flash_timer and 'color' in flash_timer:
+            if elapsed >= flash_timer['duration']:
+                return None
+
+            index = flash_timer['index']
+            color = flash_timer['color']
+
+            for i, button in enumerate(buttons):
+                if i == index:
+                    pygame.draw.rect(screen, color, button)
+                else:
+                    pygame.draw.rect(screen, (0, 0, 255), button)
+
+            return flash_timer
+
+
+        if 'sequence' in flash_timer:
+            if elapsed >= flash_timer['duration']:
+                flash_timer['step'] += 1
+                flash_timer['start_time'] = current_time
+
+                if flash_timer['step'] >= len(flash_timer['sequence']) * 2:
+                    return None
+
+            step = flash_timer['step']
+            index = flash_timer['sequence'][step // 2]
+
+            if step % 2 == 0:
+                color = (0, 225, 0)  
+            else:
+                color = (0, 0, 255)  
+
+            for i, button in enumerate(buttons):
+                if i == index:
+                    pygame.draw.rect(screen, color, button)
+                else:
+                    pygame.draw.rect(screen, (0, 0, 255), button)
+
+            return flash_timer
+
+        return None
+
 
 # LEVEL / SCENES
     def get_scene(scene):
@@ -477,10 +579,16 @@ async def main ():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit() 
-                sys.exit()   
+                sys.exit() 
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit() 
+                    sys.exit()   
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos  
+                if seq_played == True:   
+                    s, flash_timer, call = dial(buttons, sequence, mouse_pos, s, flash_timer)
             
             if event.type == pygame.KEYDOWN:
                 if throw_rope == False:
@@ -564,22 +672,42 @@ async def main ():
                     grounded = False
 
                            
-           
 
         elif is_yes == True:
             coin_count = use_coin(coin_count)
             scene += 1
             phone_buttons(buttons)
-            for button in buttons:
-                if button.collidepoint(mouse_pos):
-                    phone_call(order) # SWAP TO ORDER 
+            current_time = pygame.time.get_ticks()
+
+            if seq_played == False:
+                flash_timer = phone_sequence(sequence, current_time)
+                seq_played = True
+
+            if flash_timer: 
+                flash_timer = flash(flash_timer, current_time, buttons)
+
+                if flash_timer and flash_timer.get('wrong'):
+                    if current_time - flash_timer['start_time'] >= flash_timer['duration']:
+                        flash_timer = None
+                        s = 0
+                        call = None
+                        seq_played = False
+
+            elif seq_played == True:
+                if call == True:
+                    phone_call(order) 
+                elif call == False:
+                    call = None
+                    s = 0
+                    seq_played = False
+            
 
         elif is_yes == False:
             x = 440
             is_yes = None
 
 
-
+        
         pygame.display.flip()
         
                     
