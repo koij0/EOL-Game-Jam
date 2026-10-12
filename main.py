@@ -79,9 +79,19 @@ async def main ():
     for i in range(SEGMENTS):
         rope_points.append([x_rope, y_rope + i * SEGMENT_LENGTH, x_rope, y_rope + i * SEGMENT_LENGTH])
 
+
     no_move = True
     swing = False
     throw_rope = False
+
+    buttons = []
+    for i in range(3):
+        for j in range(3):
+            buttons.append(pygame.Rect((j * 125) + 125, (i * 125) + 125 , 100, 100))
+    buttons.append(pygame.Rect(250, 500, 100, 100))
+
+    mouse_pos = (0, 0)
+    
 
 
 
@@ -234,7 +244,7 @@ async def main ():
             x_loc = SCREEN_WIDTH - 60 
 
         # Ground
-        if scene == 18: #3 or scene == 7 or scene == 11 or scene == 15 or scene == 18:
+        if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 18:
             if y_loc > GROUND - 50:
                 y_loc = GROUND - 50
                 grounded = True
@@ -354,7 +364,11 @@ async def main ():
         pygame.draw.rect(screen, PLAYER_COLOR, phonebooth)
         return phonebooth
 
-
+    # Phone Screen
+    def phone_buttons(buttons):
+        screen.fill((0, 0, 0))
+        for button in buttons:
+            pygame.draw.rect(screen, (0, 0, 255), button)
 
 
 # LEVEL / SCENES
@@ -425,7 +439,7 @@ async def main ():
 
 # PHONE BOOTH CUT-SCENES
 
-    def phonebooth(order):
+    def phone_call(order):
         screen.fill((0, 0, 0))
     # Intro 
         if order == 0: 
@@ -464,6 +478,9 @@ async def main ():
             if event.type == pygame.QUIT:
                 pygame.quit() 
                 sys.exit()   
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = event.pos  
             
             if event.type == pygame.KEYDOWN:
                 if throw_rope == False:
@@ -487,7 +504,7 @@ async def main ():
             barriers, platforms = get_scene(scene)
             walls()
 
-            if scene == 18: #== 3 or scene == 7 or scene == 11 or scene == 15 or scene == 18:
+            if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 18:
                 ground()
                 # Rope hits ground/platforms/etc
                 for i in range(len(rope_points)):
@@ -543,6 +560,8 @@ async def main ():
                 if player().colliderect(platform):
                     grounded = True
                     y = platform.y - 52
+                else:
+                    grounded = False
 
                            
            
@@ -550,7 +569,11 @@ async def main ():
         elif is_yes == True:
             coin_count = use_coin(coin_count)
             scene += 1
-            phonebooth(order)
+            phone_buttons(buttons)
+            for button in buttons:
+                if button.collidepoint(mouse_pos):
+                    phone_call(order) # SWAP TO ORDER 
+
         elif is_yes == False:
             x = 440
             is_yes = None
