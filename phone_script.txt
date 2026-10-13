@@ -1,0 +1,6 @@
+The line is currently busy. 
+Please Remain on the Line.
+Have you had thoughts about how you might do this?
+Are you safe?
+Do you need help?
+You've reached the end of the line...

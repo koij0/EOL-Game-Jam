@@ -64,9 +64,11 @@ async def main ():
     coin_count = 1
     coin_collected = False
     order = 0
-    is_yes = None
+    coin_yes = None
+    phone_answer = None
 
     lives = 9
+    life = False
 
     scene = 0
     time = 5
@@ -92,6 +94,7 @@ async def main ():
 
     mouse_pos = (0, 0)
 
+    phone_screen = None
     call = None
     flash_timer = None
     sequence = [7, 9, 9, 1, 6, 2, 7, 1, 4, 4]
@@ -101,6 +104,12 @@ async def main ():
     
     
 
+# FILES
+    phone_script = []
+    with open('phone_script.txt', 'r') as phone_file:
+                for line in phone_file:
+                    line = line.strip()
+                    phone_script.append(line)
 
 
 
@@ -113,9 +122,21 @@ async def main ():
 
 # UPLOADS
 
-    # Art
-    bg = pygame.image.load("background.png").convert_alpha()
-    bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
+    # Background
+
+    BG = pygame.image.load("background.png").convert_alpha()
+    BG = pygame.transform.scale(BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    # Player
+    PLAYER_IDLE = pygame.image.load("sprites/idle.png").convert_alpha()
+    PLAYER_IDLE = pygame.transform.scale(PLAYER_IDLE, (100, 120))
+    PLAYER_WALK1 = pygame.image.load("sprites/walk1.png").convert_alpha()
+    PLAYER_WALK1 = pygame.transform.scale(PLAYER_WALK1, (100, 120))
+    PLAYER_WALK2 = pygame.image.load("sprites/walk2.png").convert_alpha()
+    PLAYER_WALK2 = pygame.transform.scale(PLAYER_WALK2, (100, 120))
+    PLAYER_JUMP = pygame.image.load("sprites/jump.png").convert_alpha()
+    PLAYER_JUMP = pygame.transform.scale(PLAYER_JUMP, (100, 120))
+
 
 
 
@@ -158,8 +179,8 @@ async def main ():
 # PLAYER
     def player():
     # Sprite Rendering
-        player = pygame.Rect(x, y, 50, 50)
-        pygame.draw.rect(screen, PLAYER_COLOR, player)
+        player = PLAYER_IDLE.get_rect(topleft = (x, y)) # pygame.Rect(x, y, 50, 50)
+        screen.blit(PLAYER_IDLE, player) # pygame.draw.rect(screen, PLAYER_COLOR, player)
         return player
 
 
@@ -246,15 +267,15 @@ async def main ():
         # Boundaries
 
         # Wall
-        if x_loc < 10:
-            x_loc = 10
-        elif x_loc > SCREEN_WIDTH - 60:
-            x_loc = SCREEN_WIDTH - 60 
+        if x_loc < 0:
+            x_loc = 0
+        elif x_loc > SCREEN_WIDTH - 100:
+            x_loc = SCREEN_WIDTH - 100 
 
         # Ground
         if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 18:
-            if y_loc > GROUND - 50:
-                y_loc = GROUND - 50
+            if y_loc > GROUND - 110:
+                y_loc = GROUND - 110
                 grounded = True
                 jumped = False
             
@@ -363,6 +384,17 @@ async def main ():
     def count(count):
         draw_text(f"Coins: {count}", 25, 25)
 
+# LIVES
+    # Generate
+    def heart():
+        heart = [pygame.Rect(400, 400, 25, 25)] 
+        pygame.draw.rect(screen, (255, 192, 203), heart[0])
+        return heart
+    
+    # Lose
+    def lose_life(lives):
+        lives -= 1
+        return lives
 
 # PHONE BOOTH 
 
@@ -389,7 +421,6 @@ async def main ():
             }
 
         return flash_timer
-
 
     # Dial
     def dial(buttons, sequence, mouse_pos, s, flash_timer):
@@ -482,7 +513,7 @@ async def main ():
         if scene == 0:
             barriers.append(pygame.Rect(0, 400, 200, 10))
             barriers.append(pygame.Rect(400, 400, 200, 10))
-            platforms.append(pygame.Rect(300, 100, 100, 10))
+            platforms.append(pygame.Rect(300, 150, 100, 10))
 
             for barrier in barriers:
                 pygame.draw.rect(screen, (255, 0, 0), barrier)
@@ -541,26 +572,41 @@ async def main ():
 
 # PHONE BOOTH CUT-SCENES
 
-    def phone_call(order):
+    def phone_call(order, phone_script, phone_answer):
         screen.fill((0, 0, 0))
     # Intro 
         if order == 0: 
-            draw_text("INTRO", 250, 400)
+            draw_text(phone_script[0], 100, 200)
+            draw_text(phone_script[1], 100, 300)
+            if phone_answer == True:
+                order = 1
+                return order, phone_answer
     # 1 - “Have you had thoughts about how you might do this?” 
         elif order == 1: 
-            print("Have you had thoughts about how you might do this?")
+            draw_text(phone_script[2], 100, 200)
+            if phone_answer == True:
+                order = 2
+                return order, phone_answer
     # 2 - “Are you safe?”
         elif order == 2: 
-            print("Are you safe?")
+            draw_text(phone_script[3], 200, 200)
+            if phone_answer == True:
+                order = 3
+                return order, phone_answer
     # 3 - “Do you need help?”
         elif order == 3: 
-            print("Do you need help?")
+            draw_text(phone_script[4], 200, 200)
+            if phone_answer == True:
+                order = 4
+                return order, phone_answer
     # 4 - You’ve reached the end of the line…
         elif order == 4: 
-            print("You've reached the end of the line...")
+            draw_text(phone_script[5], 100, 200)
     # Ending 1 
 
     # Ending 2
+        return order, False
+        
 
 
 
@@ -589,6 +635,7 @@ async def main ():
                 mouse_pos = event.pos  
                 if seq_played == True:   
                     s, flash_timer, call = dial(buttons, sequence, mouse_pos, s, flash_timer)
+
             
             if event.type == pygame.KEYDOWN:
                 if throw_rope == False:
@@ -597,18 +644,28 @@ async def main ():
                         y_rope = y
                         throw_rope = True
                         time = 5
+                        
+                if coin_yes == None:
+                    if event.key == pygame.K_y:
+                        coin_yes = True
+                    if event.key == pygame.K_n:
+                        coin_yes = False
 
-                if event.key == pygame.K_y:
-                    is_yes = True
-                if event.key == pygame.K_n:
-                    is_yes = False
+                elif coin_yes == True:
+                    if event.key == pygame.K_y or event.key == pygame.K_n:
+                        phone_answer = True
+                    
             
                         
         # Initial Setup
         # screen.fill(BG_COLOR)
 
-        if is_yes == None:
-            screen.blit(bg, (0,0))
+        if life == True:
+            lives = lose_life(lives)
+            life = False
+        
+        if coin_yes == None:
+            screen.blit(BG, (0,0))
             barriers, platforms = get_scene(scene)
             walls()
 
@@ -656,12 +713,12 @@ async def main ():
                         draw_text("No", 334, 460) 
 
 
-        # Barriers    
+        # Barriers
+                
             for barrier in barriers:
                 if player().colliderect(barrier):
-                    # lives -= 1
-                    print("HIT BARRIER")
-                        
+                    ## FIGURE OUT HOW TO LOSE A LIFE 
+                    lives = lose_life(lives)                      
 
         # Platforms
             for platform in platforms:
@@ -673,38 +730,51 @@ async def main ():
 
                            
 
-        elif is_yes == True:
-            coin_count = use_coin(coin_count)
-            scene += 1
-            phone_buttons(buttons)
-            current_time = pygame.time.get_ticks()
+        elif coin_yes == True:
 
-            if seq_played == False:
-                flash_timer = phone_sequence(sequence, current_time)
-                seq_played = True
+            if phone_screen == None:
+                coin_count = use_coin(coin_count)
+                phone_screen = True
 
-            if flash_timer: 
-                flash_timer = flash(flash_timer, current_time, buttons)
+            elif phone_screen == True:
+                phone_buttons(buttons)
+                current_time = pygame.time.get_ticks()
 
-                if flash_timer and flash_timer.get('wrong'):
-                    if current_time - flash_timer['start_time'] >= flash_timer['duration']:
-                        flash_timer = None
-                        s = 0
-                        call = None
-                        seq_played = False
+                if seq_played == False and flash_timer == None:
+                    flash_timer = phone_sequence(sequence, current_time)
+                    seq_played = True
+                    
 
-            elif seq_played == True:
+                if flash_timer: 
+                    flash_timer = flash(flash_timer, current_time, buttons)
+
+                    if flash_timer and flash_timer.get('wrong', False):
+                        if current_time - flash_timer['start_time'] >= flash_timer['duration']:
+                            flash_timer = None
+                            s = 0
+                            call = None
+                            seq_played = False
+                    
+            
+            if seq_played == True:
                 if call == True:
-                    phone_call(order) 
+                    order, phone_answer = phone_call(order, phone_script, phone_answer) 
+                    if phone_answer == True:
+                        call = None
+                        s = 0
+                        scene += 1
+                        seq_played = False
+                        coin_yes = False
+                        phone_answer = None
                 elif call == False:
                     call = None
                     s = 0
                     seq_played = False
             
 
-        elif is_yes == False:
+        elif coin_yes == False:
             x = 440
-            is_yes = None
+            coin_yes = None
 
 
         
