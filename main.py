@@ -55,7 +55,7 @@ async def main ():
 
 # INITIALIZATION
 
-    x = 325 # x = 300
+    x = 250 # x = 300
     y = 50 # y = 350
     y_velocity = 0
     x_velocity = 0
@@ -177,10 +177,14 @@ async def main ():
 
 
 # PLAYER
-    def player():
+    def player(jumped):
     # Sprite Rendering
-        player = PLAYER_IDLE.get_rect(topleft = (x, y)) # pygame.Rect(x, y, 50, 50)
-        screen.blit(PLAYER_IDLE, player) # pygame.draw.rect(screen, PLAYER_COLOR, player)
+        if jumped == True:
+            player = PLAYER_JUMP.get_rect(topleft = (x, y)) 
+            screen.blit(PLAYER_JUMP, player)
+        else:
+            player = PLAYER_IDLE.get_rect(topleft = (x, y)) 
+            screen.blit(PLAYER_IDLE, player)
         return player
 
 
@@ -263,6 +267,9 @@ async def main ():
         x_velocity = 0
         y_velocity = 0
 
+        # Reset Jump
+        if grounded == True:
+            jumped = False
 
         # Boundaries
 
@@ -511,9 +518,9 @@ async def main ():
     # 0 - Phone Call / Home 
 
         if scene == 0:
-            barriers.append(pygame.Rect(0, 400, 200, 10))
-            barriers.append(pygame.Rect(400, 400, 200, 10))
-            platforms.append(pygame.Rect(300, 150, 100, 10))
+            barriers.append(pygame.Rect(0, 500, 200, 10))
+            barriers.append(pygame.Rect(400, 500, 200, 10))
+            platforms.append(pygame.Rect(250, 150, 100, 10))
 
             for barrier in barriers:
                 pygame.draw.rect(screen, (255, 0, 0), barrier)
@@ -521,9 +528,26 @@ async def main ():
             for platform in platforms:
                 pygame.draw.rect(screen, (0, 255, 0), platform)
         elif scene == 1:
-            scene = 1
+            barriers.append(pygame.Rect(200, 300, 200, 10))
+            platforms.append(pygame.Rect(250, 600, 100, 10))
+            
+            for barrier in barriers:
+                pygame.draw.rect(screen, (255, 0, 0), barrier)
+            
+            for platform in platforms:
+                pygame.draw.rect(screen, (0, 255, 0), platform)
+
         elif scene == 2:
-            scene = 2
+            barriers.append(pygame.Rect(200, 600, 200, 10))
+            barriers.append(pygame.Rect(400, 600, 200, 10))
+            barriers.append(pygame.Rect(0, 200, 200, 10))
+            barriers.append(pygame.Rect(200, 200, 200, 10))
+            
+            for barrier in barriers:
+                pygame.draw.rect(screen, (255, 0, 0), barrier)
+            
+            for platform in platforms:
+                pygame.draw.rect(screen, (0, 255, 0), platform)
         elif scene == 3:
             scene = 3
 
@@ -583,25 +607,33 @@ async def main ():
                 return order, phone_answer
     # 1 - “Have you had thoughts about how you might do this?” 
         elif order == 1: 
-            draw_text(phone_script[2], 100, 200)
+            draw_text(phone_script[2], 130, 200)
+            draw_text(phone_script[3], 80, 250)
+            draw_text("Yes", 225, 600) 
+            draw_text("No", 334, 600) 
             if phone_answer == True:
                 order = 2
                 return order, phone_answer
     # 2 - “Are you safe?”
         elif order == 2: 
-            draw_text(phone_script[3], 200, 200)
+            draw_text(phone_script[4], 200, 200)
+            draw_text("Yes", 225, 600) 
+            draw_text("No", 334, 600) 
             if phone_answer == True:
                 order = 3
                 return order, phone_answer
     # 3 - “Do you need help?”
         elif order == 3: 
-            draw_text(phone_script[4], 200, 200)
+            draw_text(phone_script[5], 180, 200)
+            draw_text("Yes", 225, 600) 
+            draw_text("No", 334, 600) 
             if phone_answer == True:
                 order = 4
                 return order, phone_answer
     # 4 - You’ve reached the end of the line…
         elif order == 4: 
-            draw_text(phone_script[5], 100, 200)
+            draw_text(phone_script[6], 100, 200)
+            draw_text(phone_script[7], 100, 250)
     # Ending 1 
 
     # Ending 2
@@ -676,13 +708,14 @@ async def main ():
                     if ground().collidepoint(rope_points[i][0], rope_points[i][1]):
                         rope_points[i][1] = ground().top
 
-            player()
+            player(jumped)
             count(coin_count)
             if not coin_collected: 
                 coin = gen_coin()
 
         
             keys = pygame.key.get_pressed()
+            # print("LIVES: ", lives)
     
 
         # ROPE
@@ -692,13 +725,13 @@ async def main ():
         # MOVE        
             grounded, x, y, swing, jumped, time, throw_rope, no_move = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move)
             grounded, x, y, scene, x_velocity, y_velocity, jumped = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, throw_rope, keys, angle)
-            player()
+            player(jumped)
 
 
      # COLLISIONS
 
             if len(coin) > 0: ## FIX 
-                if player().colliderect(coin[0]):
+                if player(jumped).colliderect(coin[0]):
                     coin_count = get_coin(coin_count)
                     coin_collected = True
                     coin.remove(coin[0])
@@ -706,7 +739,7 @@ async def main ():
             if scene == 3 or scene == 7 or scene == 11 or scene == 15:
                 draw_phonebooth()
                 if coin_count > 0:        
-                    if player().colliderect(draw_phonebooth()):
+                    if player(jumped).colliderect(draw_phonebooth()):
                         pygame.draw.rect(screen, FLOOR_COLOR, (200, 400, 200, 100))  
                         draw_text("Use Coin?", 235, 410) 
                         draw_text("Yes", 225, 460) 
@@ -714,17 +747,16 @@ async def main ():
 
 
         # Barriers
-                
-            for barrier in barriers:
-                if player().colliderect(barrier):
-                    ## FIGURE OUT HOW TO LOSE A LIFE 
-                    lives = lose_life(lives)                      
+            if life == False:   
+                for barrier in barriers:
+                    if player(jumped).colliderect(barrier):
+                        life = True                      
 
         # Platforms
             for platform in platforms:
-                if player().colliderect(platform):
+                if player(jumped).colliderect(platform):
                     grounded = True
-                    y = platform.y - 52
+                    y = platform.y - 110
                 else:
                     grounded = False
 
@@ -773,7 +805,7 @@ async def main ():
             
 
         elif coin_yes == False:
-            x = 440
+            x = 390
             coin_yes = None
 
 
