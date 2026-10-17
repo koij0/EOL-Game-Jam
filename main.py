@@ -208,7 +208,7 @@ async def main ():
                 frame = (frame + 1) % len(PLAYER_WALK)
 
             walk = PLAYER_WALK[frame]
-            
+
             if walking_l == True: 
                 walk = pygame.transform.flip(walk, True, False)
 
@@ -672,40 +672,53 @@ async def main ():
 
 # PHONE BOOTH CUT-SCENES
 
-    def phone_call(order, phone_script, phone_answer):
+    def phone_call(order, phone_script, phone_answer, lives):
         screen.fill((0, 0, 0))
     # Intro 
         if order == 0: 
             draw_text(phone_script[0], 100, 200)
             draw_text(phone_script[1], 100, 300)
-            if phone_answer == True:
+            draw_text("Yes", 225, 600) 
+            draw_text("No", 334, 600)
+
+            if phone_answer != None:
                 order = 1
-                return order, phone_answer
+            
     # 1 - “Have you had thoughts about how you might do this?” 
         elif order == 1: 
             draw_text(phone_script[2], 130, 200)
             draw_text(phone_script[3], 80, 250)
             draw_text("Yes", 225, 600) 
             draw_text("No", 334, 600) 
-            if phone_answer == True:
+            if phone_answer != None:
                 order = 2
-                return order, phone_answer
+            
+            if phone_answer == True:
+                lives = lose_life(lives)
+                
+                
     # 2 - “Are you safe?”
         elif order == 2: 
             draw_text(phone_script[4], 200, 200)
             draw_text("Yes", 225, 600) 
             draw_text("No", 334, 600) 
-            if phone_answer == True:
+            if phone_answer != None:
                 order = 3
-                return order, phone_answer
+
+            if phone_answer == False:
+                lives = lose_life(lives)
+                
     # 3 - “Do you need help?”
         elif order == 3: 
             draw_text(phone_script[5], 180, 200)
             draw_text("Yes", 225, 600) 
             draw_text("No", 334, 600) 
-            if phone_answer == True:
+            if phone_answer != None:
                 order = 4
-                return order, phone_answer
+                
+            if phone_answer == False:
+                lives = lose_life(lives)
+                
     # 4 - You’ve reached the end of the line…
         elif order == 4: 
             draw_text(phone_script[6], 100, 200)
@@ -713,7 +726,8 @@ async def main ():
     # Ending 1 
 
     # Ending 2
-        return order, False
+
+        return order, phone_answer, lives
         
 
 
@@ -768,8 +782,10 @@ async def main ():
                         coin_yes = False
 
                 elif coin_yes == True:
-                    if event.key == pygame.K_y or event.key == pygame.K_n:
+                    if event.key == pygame.K_y:
                         phone_answer = True
+                    elif event.key == pygame.K_n:
+                        phone_answer = False
                     
             
                         
@@ -795,7 +811,6 @@ async def main ():
 
         
             keys = pygame.key.get_pressed()
-            # print("LIVES: ", lives)
     
 
         # ROPE
@@ -883,6 +898,7 @@ async def main ():
 
         elif coin_yes == True:
 
+            # Phone call
             if phone_screen == None:
                 coin_count = use_coin(coin_count)
                 phone_screen = True
@@ -909,8 +925,9 @@ async def main ():
             
             if seq_played == True:
                 if call == True:
-                    order, phone_answer = phone_call(order, phone_script, phone_answer) 
-                    if phone_answer == True:
+                    order, phone_answer, lives = phone_call(order, phone_script, phone_answer, lives) 
+                    print("ORDER, ", order)
+                    if phone_answer != None:
                         call = None
                         s = 0
                         scene += 1
