@@ -104,6 +104,7 @@ async def main ():
     sequence = [7, 9, 9, 1, 6, 2, 7, 1, 4, 4]
     s = 0
     seq_played = False
+
     
     
     
@@ -433,9 +434,11 @@ async def main ():
 
 # LIVES
     # Generate
-    def heart():
-        heart = [pygame.Rect(400, 400, 25, 25)] 
-        pygame.draw.rect(screen, (255, 192, 203), heart[0])
+    def heart(lives):
+        heart = []
+        for i in range(lives):
+            heart.append(pygame.Rect(560 - (i*25), 30, 20, 20))
+            pygame.draw.rect(screen, (255, 192, 203), heart[i])
         return heart
     
     # Lose
@@ -739,10 +742,6 @@ async def main ():
                         
         # Initial Setup
         # screen.fill(BG_COLOR)
-
-        if life == True:
-            lives = lose_life(lives)
-            life = False
         
         if coin_yes == None:
             screen.blit(BG, (0,0))
@@ -816,11 +815,28 @@ async def main ():
                 touch_rope = False
 
 
-        # Barriers
-            if life == False:   
-                for barrier in barriers:
-                    if character.colliderect(barrier):
-                        life = True                      
+        # Barriers  
+            hit_barrier = False
+            for barrier in barriers:
+                if character.colliderect(barrier):
+                    hit_barrier = True
+                    break
+
+        # Lives
+            if hit_barrier == True:
+                if life == False: 
+                    lives = lose_life(lives)
+                    life = True
+            else:
+                life = False
+
+        # Check Lives
+            if lives <= 0:
+                print("END GAME")
+
+
+        # Hearts
+            hearts = heart(lives)
 
         # Platforms
             for platform in platforms:
