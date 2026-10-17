@@ -60,8 +60,16 @@ async def main ():
     y = 50 # y = 350
     y_velocity = 0
     x_velocity = 0
+
     grounded = False
     jumped = False
+    walking_l = False
+    walking_r = False
+
+    frame = 0
+
+
+
     coin_count = 1
     coin_collected = False
     order = 0
@@ -125,6 +133,9 @@ async def main ():
     pygame.display.set_caption("EOL")
     clock = pygame.time.Clock()    
 
+    animate_time = pygame.time.get_ticks()
+
+
 # UPLOADS
 
     # Background
@@ -139,6 +150,9 @@ async def main ():
     PLAYER_WALK1 = pygame.transform.scale(PLAYER_WALK1, (100, 120))
     PLAYER_WALK2 = pygame.image.load("sprites/walk2.png").convert_alpha()
     PLAYER_WALK2 = pygame.transform.scale(PLAYER_WALK2, (100, 120))
+
+    PLAYER_WALK = [PLAYER_WALK1, PLAYER_WALK2]
+    
     PLAYER_JUMP = pygame.image.load("sprites/jump.png").convert_alpha()
     PLAYER_JUMP = pygame.transform.scale(PLAYER_JUMP, (100, 120))
 
@@ -182,30 +196,49 @@ async def main ():
 
 
 # PLAYER
-    def player(jumped):
+    def player(jumped, walking_l, walking_r, animate_time, frame, x, y):
+        now = pygame.time.get_ticks()
     # Sprite Rendering
         if jumped == True:
-            player = PLAYER_JUMP.get_rect(topleft = (x, y)) 
-            screen.blit(PLAYER_JUMP, player)
-            jumped = False
+            character = PLAYER_JUMP.get_rect(topleft = (x, y)) 
+            screen.blit(PLAYER_JUMP, character)
+        elif walking_l == True or walking_r == True:
+            if now -  animate_time > 200:
+                animate_time = now
+                frame = (frame + 1) % len(PLAYER_WALK)
+
+            walk = PLAYER_WALK[frame]
+            
+            if walking_l == True: 
+                walk = pygame.transform.flip(walk, True, False)
+
+            character = walk.get_rect(topleft = (x, y)) 
+            screen.blit(walk, character)
         else:
-            player = PLAYER_IDLE.get_rect(topleft = (x, y)) 
-            screen.blit(PLAYER_IDLE, player)
-        return player, jumped
+            character = PLAYER_IDLE.get_rect(topleft = (x, y)) 
+            screen.blit(PLAYER_IDLE, character)
+            frame = 0
+        return character, jumped, animate_time, frame
 
 
 # MOVEMENT
-    def player_move(x_loc, y_loc, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y):
+    def player_move(x_loc, y_loc, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r):
+        walking_l = False
+        walking_r = False
 
         if grounded == True:
             if keys[pygame.K_LEFT]:
                 x_loc -= PLAYER_SPEED
+                walking_l = True
             if keys[pygame.K_RIGHT]:
                 x_loc += PLAYER_SPEED
+                walking_r = True
             if keys[pygame.K_UP]:
                 y_loc += JUMP_FORCE
                 grounded = False
                 jumped = True
+            
+
 
         if throw_rope == True: 
             time -= dt
@@ -260,7 +293,7 @@ async def main ():
         else:
             swing = False
 
-        return grounded, x_loc, y_loc, swing, jumped, time, throw_rope, no_move
+        return grounded, x_loc, y_loc, swing, jumped, time, throw_rope, no_move, walking_l, walking_r
         
         
     
@@ -755,7 +788,7 @@ async def main ():
                     if ground().collidepoint(rope_points[i][0], rope_points[i][1]):
                         rope_points[i][1] = ground().top
 
-            player(jumped)
+            player(jumped, walking_l, walking_r, animate_time, frame, x, y)
             count(coin_count)
             if not coin_collected: 
                 coin = gen_coin()
@@ -770,8 +803,8 @@ async def main ():
                 angle, angle_velocity, x_velocity, y_velocity = rope(rope_points, angle, angle_velocity, swing, x_velocity, y_velocity, keys)
         
         # MOVE      
-            character, jumped = player(jumped)  
-            grounded, x, y, swing, jumped, time, throw_rope, no_move = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y)
+            character, jumped, animate_time, frame = player(jumped, walking_l, walking_r, animate_time, frame, x, y)  
+            grounded, x, y, swing, jumped, time, throw_rope, no_move, walking_l, walking_r = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r)
             grounded, x, y, scene, x_velocity, y_velocity, jumped = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope)
 
 
