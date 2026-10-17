@@ -39,7 +39,7 @@ async def main ():
 
 
     # Rope
-    SEGMENTS = 5
+    SEGMENTS = 6
     SEGMENT_LENGTH = 30
     AIR = 0.93
     ITERATIONS = 5
@@ -86,6 +86,9 @@ async def main ():
     no_move = True
     swing = False
     throw_rope = False
+    touch_rope = False
+    touch_x = None
+    touch_y = None
 
     buttons = []
     for i in range(3):
@@ -191,7 +194,7 @@ async def main ():
 
 
 # MOVEMENT
-    def player_move(x_loc, y_loc, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move):
+    def player_move(x_loc, y_loc, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y):
 
         if grounded == True:
             if keys[pygame.K_LEFT]:
@@ -208,41 +211,50 @@ async def main ():
             jumped = False
 
             if time <= 0:
-                y_loc = rope_points[-1][1] + 10
-                swing = False
                 throw_rope = False
-                no_move = True
-                time = 0 
+                time = 0
 
-            else:
-                x_loc = rope_points[-1][0] - 22
-
-                if keys[pygame.K_RIGHT] or keys[pygame.K_LEFT]:
-                    swing = True
-                    y_loc = rope_points[-1][1] - 22
+            if touch_rope == True and keys[pygame.K_SPACE]:
+                if time <= 0:
+                    y_loc = rope_points[-1][1] + 10
+                    swing = False
+                    throw_rope = False
+                    touch_rope = False
+                    no_move = True
+                    time = 0 
 
                 else:
-                    swing = False
+                    x_loc = touch_x
+                    y_loc = touch_y
 
-                if swing == False: 
-                    if keys[pygame.K_UP]:
-                        swing = False
-                        no_move = False
-                        y_loc -= (PLAYER_SPEED / 2)
+                    if keys[pygame.K_RIGHT] or keys[pygame.K_LEFT]:
+                        swing = True
+                        x_loc = rope_points[-1][0] - 22
+                        y_loc = rope_points[-1][1] - 22
 
-                        if y_loc < rope_points[0][1] + 5:
-                            y_loc = rope_points[0][1] + 5
-
-                    elif keys[pygame.K_DOWN]:
-                        swing = False
-                        y_loc += (PLAYER_SPEED / 2) 
-
-                        if y_loc > rope_points[-1][1] - 5:
-                            throw_rope = False
                     else:
-                        if no_move == True:
-                            y_loc = rope_points[-1][1] - 22
+                        swing = False
+
+                    if swing == False: 
+                        if keys[pygame.K_UP]:
                             swing = False
+                            no_move = False
+                            y_loc -= (PLAYER_SPEED / 2)
+
+                            if y_loc < rope_points[0][1] + 5:
+                                y_loc = rope_points[0][1] + 5
+
+                        elif keys[pygame.K_DOWN]:
+                            swing = False
+                            y_loc += (PLAYER_SPEED / 2) 
+
+                            if y_loc > rope_points[-1][1] - 5:
+                                throw_rope = False
+                                touch_rope = False
+                        else:
+                            if no_move == True:
+                                y_loc = touch_y
+                                swing = False
 
         else:
             swing = False
@@ -252,11 +264,11 @@ async def main ():
         
     
 # PHYSICS
-    def physics(x_velocity, y_velocity, x_loc, y_loc, grounded, jumped, scene, throw_rope):
+    def physics(x_velocity, y_velocity, x_loc, y_loc, grounded, jumped, scene, touch_rope):
         
         # Gravity
-        
-        if throw_rope == False:
+        attached = touch_rope and keys[pygame.K_SPACE]
+        if attached == False:
             if jumped == True:
                 y_velocity += GRAVITY
                 x_velocity *= AIR
@@ -333,8 +345,8 @@ async def main ():
             for i in range(1, len(rope_points)):
                 point = rope_points[i]
 
-                vx = (point[0] - point[2]) * 0.85
-                vy = (point[1] - point[3]) * 0.85
+                vx = (point[0] - point[2]) * 0.95
+                vy = (point[1] - point[3]) * 0.95
 
                 old_x = point[0]
                 old_y = point[1]
@@ -345,7 +357,7 @@ async def main ():
                 point[2] = old_x
                 point[3] = old_y
 
-            for _ in range(ITERATIONS):
+            for j in range(ITERATIONS):
                 rope_points[0][0] = anchor_x
                 rope_points[0][1] = anchor_y
 
@@ -366,12 +378,15 @@ async def main ():
                     offset_x = dx * difference
                     offset_y = dy * difference
 
-                    if i > 1:
+                    if i == 1:
+                        p2[0] -= offset_x
+                        p2[1] -= offset_y
+                    else:
                         p1[0] += offset_x * 0.5
                         p1[1] += offset_y * 0.5
 
-                    p2[0] -= offset_x * 0.5
-                    p2[1] -= offset_y * 0.5
+                        p2[0] -= offset_x * 0.5
+                        p2[1] -= offset_y * 0.5
 
         for i in range(len(rope_points) - 1):
             p1 = (int(rope_points[i][0]), int(rope_points[i][1]))
@@ -693,29 +708,23 @@ async def main ():
                 if seq_played == True:   
                     s, flash_timer, call = dial(buttons, sequence, mouse_pos, s, flash_timer)
 
-            
+                elif event.button == 1:
+                    x_rope, y_rope = mouse_pos
+                    rope_points = []
+                    for i in range(SEGMENTS):
+                        rope_points.append([x_rope, y_rope + i * SEGMENT_LENGTH, x_rope, y_rope + i * SEGMENT_LENGTH])
+                    rope_points[1][0] += random.uniform(-5, 5)
+
+
+                    # Reset swing physics
+                    angle = 0
+                    angle_velocity = 0
+                    swing = False
+
+                    throw_rope = True
+                    time = 5
+
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    if throw_rope == True and swing == True:
-                        rope_vx = rope_points[-1][0] - rope_points[-2][0]
-                        rope_vy = rope_points[-1][1] - rope_points[-2][1]
-
-                        throw_rope = False
-                        swing = False
-                        no_move = True
-
-                        x_velocity = max(-3, min(3, rope_vx * 0.5))
-                        y_velocity = -150 + rope_vy * 0.8
-
-                        jumped = True
-                        grounded = False 
-
-                    elif throw_rope == False:
-                        x_rope = x + 25
-                        y_rope = y
-                        throw_rope = True
-                        time = 5
-                        
                 if coin_yes == None:
                     if event.key == pygame.K_y:
                         coin_yes = True
@@ -761,10 +770,10 @@ async def main ():
             if throw_rope == True:
                 angle, angle_velocity, x_velocity, y_velocity = rope(rope_points, angle, angle_velocity, swing, x_velocity, y_velocity, keys)
         
-        # MOVE        
-            grounded, x, y, swing, jumped, time, throw_rope, no_move = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move)
-            grounded, x, y, scene, x_velocity, y_velocity, jumped = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, throw_rope)
-            character, jumped = player(jumped)
+        # MOVE      
+            character, jumped = player(jumped)  
+            grounded, x, y, swing, jumped, time, throw_rope, no_move = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y)
+            grounded, x, y, scene, x_velocity, y_velocity, jumped = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope)
 
 
      # COLLISIONS
@@ -783,6 +792,28 @@ async def main ():
                         draw_text("Use Coin?", 235, 410) 
                         draw_text("Yes", 225, 460) 
                         draw_text("No", 334, 460) 
+
+            # Rope collision
+            rope_collision = False
+            if throw_rope == True:
+                for i in range(len(rope_points) - 1):
+                    start_point = (rope_points[i][0], rope_points[i][1])
+                    end_point = (rope_points[i+1][0], rope_points[i+1][1])
+
+                    if character.clipline(start_point, end_point):
+                        rope_collision = True
+                        break
+
+            if rope_collision == True:
+                touch_x = x
+                touch_y = y
+                if touch_rope == False and not keys[pygame.K_SPACE]:
+                    time = 5
+                    touch_rope = True
+            else:
+                touch_x = None
+                touch_y = None
+                touch_rope = False
 
 
         # Barriers
