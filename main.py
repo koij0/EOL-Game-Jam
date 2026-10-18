@@ -156,7 +156,14 @@ async def main ():
     PLAYER_JUMP = pygame.image.load("sprites/jump.png").convert_alpha()
     PLAYER_JUMP = pygame.transform.scale(PLAYER_JUMP, (100, 120))
 
+    # Heart
+    HEART = pygame.image.load("sprites/heart.png").convert_alpha()
+    HEART = pygame.transform.scale(HEART, (30, 30))
 
+
+    # Coin
+    COIN = pygame.image.load("sprites/coin.png").convert_alpha()
+    COIN = pygame.transform.scale(COIN, (75, 75))
 
 
     # Audio
@@ -436,7 +443,7 @@ async def main ():
             pygame.draw.circle(screen, (229, 184, 11), (int(point[0]), int(point[1])), 4)
 
         # Ball
-        pygame.draw.circle(screen, (229, 185, 11), (int(anchor_x), int(anchor_y)), 7)
+        pygame.draw.circle(screen, (229, 185, 11), (int(anchor_x), int(anchor_y)), 10)
 
         return angle, angle_velocity, x_velocity, y_velocity
 
@@ -446,8 +453,8 @@ async def main ():
 
     # Generate
     def gen_coin():
-        coin = [pygame.Rect(400, GROUND - 50, 25, 25)] # FIX WHEN GET SPRITE COINS
-        pygame.draw.rect(screen, COIN_COLOR, coin[0])
+        coin = [COIN.get_rect(topleft = (400, GROUND - 50))] # FIX WHEN GET SPRITE COINS
+        screen.blit(COIN, coin[0])
         return coin
     
 
@@ -470,8 +477,8 @@ async def main ():
     def heart(lives):
         heart = []
         for i in range(lives):
-            heart.append(pygame.Rect(560 - (i*25), 30, 20, 20))
-            pygame.draw.rect(screen, (255, 192, 203), heart[i])
+            heart.append(HEART.get_rect(topleft = (560 - (i*25), 20)))
+            screen.blit(HEART, heart[i])
         return heart
     
     # Lose
@@ -715,7 +722,7 @@ async def main ():
             draw_text("No", 334, 600) 
             if phone_answer != None:
                 order = 4
-                
+
             if phone_answer == False:
                 lives = lose_life(lives)
                 
