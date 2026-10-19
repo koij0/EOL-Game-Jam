@@ -71,7 +71,9 @@ async def main ():
 
     frame = 0
 
-
+    tut_track = []
+    tut_screen = True
+    idx = 0
 
     coin_count = 1
     coin_collected = False
@@ -123,9 +125,17 @@ async def main ():
 # FILES
     phone_script = []
     with open('phone_script.txt', 'r') as phone_file:
-                for line in phone_file:
-                    line = line.strip()
-                    phone_script.append(line)
+        for line in phone_file:
+            line = line.strip()
+            phone_script.append(line)
+
+    tut_text = []
+    with open('tutorial.txt', 'r') as tut_file:
+        for line in tut_file:
+            line = line.strip()
+            tut_text.append(line)
+    for i in range(len(tut_text)):
+        tut_track.append(False)
 
 
 
@@ -203,6 +213,13 @@ async def main ():
         for i, line in enumerate(wrapped_lines):
             line_surf = sfont.render(line, True, color)
             surface.blit(line_surf, (x, y + i * sfont.get_height()))
+
+# TUTORIAL
+    def tutorial(tut_text, idx, tut_track):
+        pygame.draw.rect(screen, BLACK, (150, 300, 300, 170))  
+        wrap(screen, tut_text[idx], font, TEAL, 160, 320, 75)
+        draw_text("RETURN", 250, 430) 
+        tut_track[idx] = True
 
 
 # PLAYER
@@ -623,6 +640,9 @@ async def main ():
        
 
         elif scene == 2:
+            structures.append(box(310, 0, 240, 200))
+
+
             platforms.append(pygame.Rect(110, 200, 200, 10))
 
             barriers.append(pygame.Rect(200, 600, 200, 10))
@@ -760,7 +780,7 @@ async def main ():
         rope_points[0][1] = y_rope
         rope_points[0][2] = x_rope
         rope_points[0][3] = y_rope
-                
+                            
 
 # Check Events
         for event in pygame.event.get():
@@ -805,7 +825,11 @@ async def main ():
                         phone_answer = True
                     elif event.key == pygame.K_n:
                         phone_answer = False
-                    
+
+                if tut_screen == True:
+                    if event.key == pygame.K_RETURN:
+                        idx += 1
+                        tut_screen = False
             
                         
         # Initial Setup
@@ -823,6 +847,11 @@ async def main ():
                     if ground().collidepoint(rope_points[i][0], rope_points[i][1]):
                         rope_points[i][1] = ground().top
 
+            # TUT
+            if scene <= 3:
+                if tut_screen == True:
+                    tutorial(tut_text, idx, tut_track)
+
             player(jumped, grounded, walking_l, walking_r, animate_time, frame, x, y)
             count(coin_count)
             
@@ -833,6 +862,12 @@ async def main ():
 
         # ROPE
             if throw_rope == True:
+                if scene == 1 and tut_track[2] == False:
+                        tut_screen = True
+                elif scene == 1 and tut_track[3] == False:
+                    tut_screen = True
+                elif scene == 1 and tut_track[4] == False:
+                    tut_screen = True
                 angle, angle_velocity, x_velocity, y_velocity = rope(rope_points, angle, angle_velocity, swing, x_velocity, y_velocity, keys)
         
         # MOVE      
@@ -890,6 +925,9 @@ async def main ():
 
         # Lives
             if hit_barrier == True:
+                if scene <= 2 and tut_track[6] == False:
+                    idx = 6
+                    tut_screen = True
                 if life == False: 
                     lives = lose_life(lives)
                     life = True
@@ -905,6 +943,13 @@ async def main ():
             hearts = heart(lives)
 
         # Platforms
+
+            #tut
+            if scene == 1 and tut_track[1] == False:
+                if character.colliderect(platforms[3]):
+                    tut_screen = True
+
+
             for platform in platforms:
                 if character.colliderect(platform):
                     grounded = True

@@ -1,0 +1,8 @@
+Use ARROW KEYS to MOVE and JUMP
+To use ROPE click with MOUSE
+To hold onto ROPE hold the SPACE
+Use ARROW KEYS to CLIMB and SWING
+Be careful, the ROPE has a TIME LIMIT!
+Collect COINS!
+If you hit a BARRIER, you lose a LIFE!
+There's a PHONE...
