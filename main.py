@@ -617,10 +617,11 @@ async def main ():
        
 
         elif scene == 2:
+            platforms.append(pygame.Rect(110, 200, 200, 10))
+
             barriers.append(pygame.Rect(200, 600, 200, 10))
             barriers.append(pygame.Rect(400, 600, 200, 10))
-            barriers.append(pygame.Rect(0, 200, 200, 10))
-            barriers.append(pygame.Rect(200, 200, 200, 10))
+            
             
            
         elif scene == 3:
@@ -895,7 +896,8 @@ async def main ():
             for platform in platforms:
                 if character.colliderect(platform):
                     grounded = True
-                    y = platform.y - 110
+                    if y > platform.y - 110: 
+                        y = platform.y - 110
                     break
                 else:
                     grounded = False
