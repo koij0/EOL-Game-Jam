@@ -11,6 +11,10 @@
 # IMPORTS
 import pygame
 import sys
+from shapely.geometry import Polygon
+from shapely.geometry import box 
+
+
 
 import random
 import math
@@ -45,11 +49,11 @@ async def main ():
     DAMPING = 0.97
 
     # Colors 
-    BG_COLOR = (128, 128, 128) # Grey
+    GREY = (128, 128, 128) # Grey
     PLAYER_COLOR = (82, 14, 125) # Purple
-    FLOOR_COLOR = (0, 0, 0) # Black
-    COIN_COLOR = (255, 255, 255) # White
-    FONT_COLOR = (0, 143, 145) # Teal
+    BLACK = (0, 0, 0) # Black
+    WHITE = (255, 255, 255) # White
+    TEAL = (0, 143, 145) # Teal
 
 
 
@@ -176,20 +180,20 @@ async def main ():
     def ground():
     # Ground
         ground = pygame.Rect((0, GROUND, SCREEN_WIDTH, 150))
-        pygame.draw.rect(screen, FLOOR_COLOR, ground)
+        pygame.draw.rect(screen, BLACK, ground)
         return ground
 
     def walls():
         wall1 = pygame.Rect((0, 0, 10, SCREEN_HEIGHT))
         wall2 = pygame.Rect((SCREEN_WIDTH - 10, 0, 10, SCREEN_HEIGHT))
-        pygame.draw.rect(screen, FLOOR_COLOR, wall1)
-        pygame.draw.rect(screen, FLOOR_COLOR, wall2)
+        pygame.draw.rect(screen, BLACK, wall1)
+        pygame.draw.rect(screen, BLACK, wall2)
         return wall1, wall2
 
 
 # TEXT
 
-    def draw_text(text, x, y, color=FONT_COLOR):
+    def draw_text(text, x, y, color=TEAL):
         img = font.render(text, True, color)
         screen.blit(img, (x, y))
 
@@ -597,10 +601,12 @@ async def main ():
     def get_scene(scene, coin_collected):
         barriers = []
         platforms = []
+        structures = []
         coin = []
     # 0 - Phone Call / Home 
 
         if scene == 1:
+            structures.append(Polygon([(600, 0), (150, 0), (600, 250)]))
             platforms.append(pygame.Rect(10, 200, 300, 10)) # bed room loft
             platforms.append(pygame.Rect(310, 250, 75, 10)) # stairs
             platforms.append(pygame.Rect(390, 300, 75, 10)) # stairs
@@ -625,7 +631,9 @@ async def main ():
             
            
         elif scene == 3:
-            scene = 3
+            structures.append(box(200, 0, 240, 400))
+            structures.append(Polygon([(200, 350), (200, 450), (350, 450)]))
+
 
         # 1 -   
 
@@ -674,7 +682,11 @@ async def main ():
         for platform in platforms:
             pygame.draw.rect(screen, (0, 255, 0), platform)
 
-        return barriers, platforms, coin
+        for structure in structures:
+            point = list(structure.exterior.coords)
+            pygame.draw.polygon(screen, BLACK, point)
+
+        return barriers, platforms, structures, coin
 
 
 # PHONE BOOTH CUT-SCENES
@@ -797,11 +809,11 @@ async def main ():
             
                         
         # Initial Setup
-        # screen.fill(BG_COLOR)
+        # screen.fill(GREY)
         
         if coin_yes == None:
             screen.blit(BG, (0,0))
-            barriers, platforms, coin = get_scene(scene, coin_collected)
+            barriers, platforms, structures, coin = get_scene(scene, coin_collected)
             walls()
 
             if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 18:
@@ -841,7 +853,7 @@ async def main ():
                 draw_phonebooth()
                 if coin_count > 0:        
                     if character.colliderect(draw_phonebooth()):
-                        pygame.draw.rect(screen, FLOOR_COLOR, (200, 400, 200, 100))  
+                        pygame.draw.rect(screen, BLACK, (200, 400, 200, 100))  
                         draw_text("Use Coin?", 235, 410) 
                         draw_text("Yes", 225, 460) 
                         draw_text("No", 334, 460) 
@@ -902,7 +914,19 @@ async def main ():
                 else:
                     grounded = False
 
-                           
+        # Structures
+            for structure in structures:
+                character_poly = box(
+                    character.left,
+                    character.top,
+                    character.right,
+                    character.bottom,
+                )
+                old_x = x
+                old_y = y
+                if character_poly.intersects(structure):
+                    x = old_x
+                    y = old_y
 
         elif coin_yes == True:
 
