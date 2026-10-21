@@ -158,16 +158,19 @@ async def main ():
 
     # Player
     PLAYER_IDLE = pygame.image.load("sprites/idle.png").convert_alpha()
-    PLAYER_IDLE = pygame.transform.scale(PLAYER_IDLE, (100, 120))
+    PLAYER_IDLE = pygame.transform.scale(PLAYER_IDLE, (80, 120))
     PLAYER_WALK1 = pygame.image.load("sprites/walk1.png").convert_alpha()
-    PLAYER_WALK1 = pygame.transform.scale(PLAYER_WALK1, (100, 120))
+    PLAYER_WALK1 = pygame.transform.scale(PLAYER_WALK1, (90, 120))
     PLAYER_WALK2 = pygame.image.load("sprites/walk2.png").convert_alpha()
     PLAYER_WALK2 = pygame.transform.scale(PLAYER_WALK2, (100, 120))
 
     PLAYER_WALK = [PLAYER_WALK1, PLAYER_WALK2]
     
     PLAYER_JUMP = pygame.image.load("sprites/jump.png").convert_alpha()
-    PLAYER_JUMP = pygame.transform.scale(PLAYER_JUMP, (100, 120))
+    PLAYER_JUMP = pygame.transform.scale(PLAYER_JUMP, (110, 130))
+
+    PLAYER_CLIMB = pygame.image.load("sprites/climb.png").convert_alpha()
+    PLAYER_CLIMB = pygame.transform.scale(PLAYER_CLIMB, (70, 140))
 
     # Heart
     HEART = pygame.image.load("sprites/heart.png").convert_alpha()
@@ -177,6 +180,11 @@ async def main ():
     # Coin
     COIN = pygame.image.load("sprites/coin.png").convert_alpha()
     COIN = pygame.transform.scale(COIN, (75, 75))
+
+
+    # Phone
+    PHONE = pygame.image.load("sprites/phone.png").convert_alpha()
+    PHONE = pygame.transform.scale(PHONE, (80, 120))
 
 
     # Audio
@@ -223,10 +231,14 @@ async def main ():
 
 
 # PLAYER
-    def player(jumped, grounded, walking_l, walking_r, animate_time, frame, x, y):
+    def player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y):
         now = pygame.time.get_ticks()
     # Sprite Rendering
-        if jumped == True or grounded == False:
+
+        if touch_rope == True:
+            character = PLAYER_CLIMB.get_rect(topleft = (x, y)) 
+            screen.blit(PLAYER_CLIMB, character)
+        elif jumped == True or grounded == False:
             character = PLAYER_JUMP.get_rect(topleft = (x, y)) 
             screen.blit(PLAYER_JUMP, character)
         elif walking_l == True or walking_r == True:
@@ -241,6 +253,7 @@ async def main ():
 
             character = walk.get_rect(topleft = (x, y)) 
             screen.blit(walk, character)
+        
         else:
             character = PLAYER_IDLE.get_rect(topleft = (x, y)) 
             screen.blit(PLAYER_IDLE, character)
@@ -510,8 +523,8 @@ async def main ():
 
     # Sprite Rendering
     def draw_phonebooth():
-        phonebooth = pygame.Rect(500, GROUND - 100, 75, 100)
-        pygame.draw.rect(screen, PLAYER_COLOR, phonebooth)
+        phonebooth = PHONE.get_rect(topleft = (480, GROUND - 110))
+        screen.blit(PHONE, phonebooth)
         return phonebooth
 
     # Phone Screen
@@ -852,7 +865,7 @@ async def main ():
                 if tut_screen == True:
                     tutorial(tut_text, idx, tut_track)
 
-            player(jumped, grounded, walking_l, walking_r, animate_time, frame, x, y)
+            player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y)
             count(coin_count)
             
 
@@ -871,7 +884,7 @@ async def main ():
                 angle, angle_velocity, x_velocity, y_velocity = rope(rope_points, angle, angle_velocity, swing, x_velocity, y_velocity, keys)
         
         # MOVE      
-            character, animate_time, frame = player(jumped, grounded, walking_l, walking_r, animate_time, frame, x, y)  
+            character, animate_time, frame = player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y)  
             grounded, x, y, swing, jumped, time, throw_rope, no_move, walking_l, walking_r = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r)
             grounded, x, y, scene, x_velocity, y_velocity, jumped = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope)
 
