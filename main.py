@@ -184,7 +184,7 @@ async def main ():
 
     # Phone
     PHONE = pygame.image.load("sprites/phone.png").convert_alpha()
-    PHONE = pygame.transform.scale(PHONE, (80, 120))
+    PHONE = pygame.transform.scale(PHONE, (100, 150))
 
 
     # Audio
@@ -523,7 +523,7 @@ async def main ():
 
     # Sprite Rendering
     def draw_phonebooth():
-        phonebooth = PHONE.get_rect(topleft = (480, GROUND - 110))
+        phonebooth = PHONE.get_rect(topleft = (480, GROUND - 130))
         screen.blit(PHONE, phonebooth)
         return phonebooth
 
@@ -636,15 +636,15 @@ async def main ():
     # 0 - Phone Call / Home 
 
         if scene == 1:
-            structures.append(Polygon([(600, 0), (150, 0), (600, 250)]))
-            platforms.append(pygame.Rect(10, 200, 300, 10)) # bed room loft
-            platforms.append(pygame.Rect(310, 250, 75, 10)) # stairs
-            platforms.append(pygame.Rect(390, 300, 75, 10)) # stairs
-            platforms.append(pygame.Rect(390, 480, 200, 10)) # landing
-            platforms.append(pygame.Rect(110, 480, 100, 10)) # landing
-            platforms.append(pygame.Rect(110, 650, 100, 10)) # landing
-            platforms.append(pygame.Rect(390, 650, 200, 10))
-            platforms.append(pygame.Rect(10, 790, 100, 10))
+            structures.append(Polygon([(600, 0), (220, 0), (600, 180)]))
+            platforms.append(pygame.Rect(10, 200, 300, 15)) # bed room loft
+            platforms.append(pygame.Rect(310, 250, 75, 15)) # stairs
+            platforms.append(pygame.Rect(390, 300, 75, 15)) # stairs
+            platforms.append(pygame.Rect(390, 480, 200, 15)) # landing
+            platforms.append(pygame.Rect(110, 480, 100, 15)) # landing
+            platforms.append(pygame.Rect(110, 650, 100, 15)) # landing
+            platforms.append(pygame.Rect(390, 650, 200, 15))
+            platforms.append(pygame.Rect(10, 790, 100, 15))
 
             barriers.append(pygame.Rect(290, 790, 400, 10)) 
 
@@ -653,10 +653,11 @@ async def main ():
        
 
         elif scene == 2:
-            structures.append(box(310, 0, 240, 200))
+            structures.append(pygame.Rect(260, 0, 30, 200))
 
 
-            platforms.append(pygame.Rect(110, 200, 200, 10))
+            platforms.append(pygame.Rect(110, 200, 200, 15))
+            platforms.append(pygame.Rect(290, 200, 200, 15))
 
             barriers.append(pygame.Rect(200, 600, 200, 10))
             barriers.append(pygame.Rect(400, 600, 200, 10))
@@ -713,11 +714,15 @@ async def main ():
             pygame.draw.rect(screen, (255, 0, 0), barrier)
                     
         for platform in platforms:
-            pygame.draw.rect(screen, (0, 255, 0), platform)
+            pygame.draw.rect(screen, BLACK, platform)
 
         for structure in structures:
-            point = list(structure.exterior.coords)
-            pygame.draw.polygon(screen, BLACK, point)
+            if isinstance(structure, Polygon):
+                point = list(structure.exterior.coords)
+                pygame.draw.polygon(screen, BLACK, point)
+            else: 
+                pygame.draw.rect(screen, BLACK, structure)
+                
 
         return barriers, platforms, structures, coin
 
@@ -884,6 +889,8 @@ async def main ():
                 angle, angle_velocity, x_velocity, y_velocity = rope(rope_points, angle, angle_velocity, swing, x_velocity, y_velocity, keys)
         
         # MOVE      
+            old_x = x
+            old_y = y
             character, animate_time, frame = player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y)  
             grounded, x, y, swing, jumped, time, throw_rope, no_move, walking_l, walking_r = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r)
             grounded, x, y, scene, x_velocity, y_velocity, jumped = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope)
@@ -972,19 +979,24 @@ async def main ():
                 else:
                     grounded = False
 
+
         # Structures
             for structure in structures:
-                character_poly = box(
-                    character.left,
-                    character.top,
-                    character.right,
-                    character.bottom,
-                )
-                old_x = x
-                old_y = y
-                if character_poly.intersects(structure):
-                    x = old_x
-                    y = old_y
+
+                if not isinstance(structure, Polygon):    
+                    if character.colliderect(structure):
+
+                        overlap_left = character.right - structure.left
+                        overlap_right = structure.right - character.left
+
+                        if overlap_left < overlap_right:
+                            character.right = structure.left
+                        else:
+                            character.left = structure.right
+
+                        x = character.left
+                    
+                        break
 
         elif coin_yes == True:
 
