@@ -640,29 +640,35 @@ async def main ():
             platforms.append(pygame.Rect(10, 200, 300, 15)) # bed room loft
             platforms.append(pygame.Rect(310, 250, 75, 15)) # stairs
             platforms.append(pygame.Rect(390, 300, 75, 15)) # stairs
-            platforms.append(pygame.Rect(390, 480, 200, 15)) # landing
-            platforms.append(pygame.Rect(110, 480, 100, 15)) # landing
-            platforms.append(pygame.Rect(110, 650, 100, 15)) # landing
-            platforms.append(pygame.Rect(390, 650, 200, 15))
+            platforms.append(pygame.Rect(390, 520, 200, 15)) # landing
+            platforms.append(pygame.Rect(110, 520, 100, 15)) # landing
             platforms.append(pygame.Rect(10, 790, 100, 15))
 
             barriers.append(pygame.Rect(290, 790, 400, 10)) 
 
-            if not coin_collected: 
-                coin = gen_coin(450, 550)
+            
        
 
         elif scene == 2:
-            structures.append(pygame.Rect(260, 0, 30, 200))
+            structures.append(pygame.Rect(250, 0, 30, 200))
 
 
             platforms.append(pygame.Rect(110, 200, 200, 15))
             platforms.append(pygame.Rect(290, 200, 200, 15))
 
-            barriers.append(pygame.Rect(200, 600, 200, 10))
-            barriers.append(pygame.Rect(400, 600, 200, 10))
+            barriers.append(pygame.Rect(400, 500, 200, 10))
+
+            platforms.append(pygame.Rect(200, 400, 200, 15))
+
+            platforms.append(pygame.Rect(400, 650, 200, 15))
             
-            
+            platforms.append(pygame.Rect(100, 650, 100, 15)) # stairs
+
+
+
+
+            if not coin_collected: 
+                coin = gen_coin(250, 300)
            
         elif scene == 3:
             structures.append(box(200, 0, 240, 400))
@@ -889,8 +895,6 @@ async def main ():
                 angle, angle_velocity, x_velocity, y_velocity = rope(rope_points, angle, angle_velocity, swing, x_velocity, y_velocity, keys)
         
         # MOVE      
-            old_x = x
-            old_y = y
             character, animate_time, frame = player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y)  
             grounded, x, y, swing, jumped, time, throw_rope, no_move, walking_l, walking_r = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r)
             grounded, x, y, scene, x_velocity, y_velocity, jumped = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope)
@@ -933,6 +937,7 @@ async def main ():
             else:
                 touch_x = None
                 touch_y = None
+                swing = False
                 touch_rope = False
 
 
@@ -969,6 +974,11 @@ async def main ():
                 if character.colliderect(platforms[3]):
                     tut_screen = True
 
+            if scene == 2 and tut_track[5] == False:
+                if character.colliderect(platforms[0]) or character.colliderect(platforms[1]):
+                    idx = 5
+                    tut_screen = True
+
 
             for platform in platforms:
                 if character.colliderect(platform):
@@ -979,6 +989,7 @@ async def main ():
                 else:
                     grounded = False
 
+            
 
         # Structures
             for structure in structures:
