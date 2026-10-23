@@ -121,16 +121,20 @@ async def main ():
 
     blink = 0
     is_visible = False
+
+    phone_ringing = False
     
     
 
 # FILES
+    # Phone Story
     phone_script = []
     with open('phone_script.txt', 'r') as phone_file:
         for line in phone_file:
             line = line.strip()
             phone_script.append(line)
 
+    # Tutorial
     tut_text = []
     with open('tutorial.txt', 'r') as tut_file:
         for line in tut_file:
@@ -142,6 +146,8 @@ async def main ():
 
 
 # SET UP
+
+    pygame.mixer.pre_init(44100, -16, 2, 2048)
 
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -190,6 +196,8 @@ async def main ():
 
 
     # Audio
+
+    RINGTONE = pygame.mixer.Sound("sfx/ringtone.wav")
 
 
     # Font
@@ -977,10 +985,7 @@ async def main ():
                         if throw_rope == True:
                             idx += 1
                         tut_screen = False
-            
-                        
-        # Initial Setup
-        # screen.fill(GREY)
+
         
         if coin_yes == None:
             screen.blit(BG, (0,0))
@@ -1177,8 +1182,14 @@ async def main ():
             
             if seq_played == True:
                 if call == True:
+                    if phone_ringing == False:
+                        RINGTONE.play(-1)  
+                        phone_ringing = True
+                    RINGTONE.play()
                     order, phone_answer, lives = phone_call(order, phone_script, phone_answer, lives) 
                     if phone_answer != None:
+                        RINGTONE.stop()
+                        phone_ringing = False
                         call = None
                         s = 0
                         scene += 1
@@ -1186,6 +1197,8 @@ async def main ():
                         coin_yes = False
                         phone_answer = None
                 elif call == False:
+                    RINGTONE.stop()
+                    phone_ringing = False
                     call = None
                     s = 0
                     seq_played = False
