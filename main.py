@@ -83,6 +83,7 @@ async def main ():
 
     lives = 9
     life = False
+    respawn = False
 
     scene = 1
     time = 5
@@ -118,7 +119,8 @@ async def main ():
     s = 0
     seq_played = False
 
-    
+    blink = 0
+    is_visible = False
     
     
 
@@ -627,8 +629,15 @@ async def main ():
         return None
 
 
+# BLINKING BARRIERS
+    def blink_time():
+        return random.randint(1000, 4000)
+
+    blink = pygame.time.get_ticks() + blink_time()
+
+
 # LEVEL / SCENES
-    def get_scene(scene, coin_collected):
+    def get_scene(scene, coin_collected, is_visible):
         barriers = []
         platforms = []
         structures = []
@@ -691,7 +700,7 @@ async def main ():
             if not coin_collected: 
                 coin = gen_coin(250, 425)
 
-            structures.append(pygame.Rect(400, 400, 20, 100))
+            structures.append(pygame.Rect(400, 410, 20, 100))
 
             barriers.append(pygame.Rect(420, 400, 120, 10))
             barriers.append(pygame.Rect(10, 790, 200, 10))
@@ -727,21 +736,22 @@ async def main ():
 
         elif scene == 9:
             platforms.append(pygame.Rect(300, 200, 300, 15))
-            barriers.append(pygame.Rect(10, 200, 300, 10)) # BLINK
 
             platforms.append(pygame.Rect(300, 400, 300, 15))
-            barriers.append(pygame.Rect(10, 400, 300, 10)) # BLINK
-
-            structures.append(pygame.Rect(300, 400, 20, 200))
+            
+            structures.append(pygame.Rect(300, 410, 20, 200))
 
             if not coin_collected: 
                 coin = gen_coin(400, 500)
 
-            barriers.append(pygame.Rect(10, 600, 300, 10)) # BLINK 
-
-
             platforms.append(pygame.Rect(10, 785, 300, 15))
-            barriers.append(pygame.Rect(310, 790, 300, 10)) # BLINK
+
+            if is_visible == True:
+                barriers.append(pygame.Rect(10, 200, 300, 10)) # BLINK
+                barriers.append(pygame.Rect(10, 400, 300, 10)) # BLINK
+                barriers.append(pygame.Rect(10, 600, 300, 10)) # BLINK
+                barriers.append(pygame.Rect(310, 790, 300, 10)) # BLINK
+            
 
         elif scene == 10:
             platforms.append(pygame.Rect(200, 200, 200, 15))
@@ -754,23 +764,26 @@ async def main ():
             barriers.append(pygame.Rect(400, 750, 200, 10))
 
         elif scene == 11:
-            barriers.append(pygame.Rect(0, 250, 600, 10)) # BLINK
-            barriers.append(pygame.Rect(0, 450, 600, 10)) # BLINK
+            if is_visible == True:
+                barriers.append(pygame.Rect(0, 250, 600, 10)) # BLINK
+                barriers.append(pygame.Rect(0, 450, 600, 10)) # BLINK
 
 
         # 3 - 
 
         elif scene == 12:
             platforms.append(pygame.Rect(10, 200, 150, 15))
-            barriers.append(pygame.Rect(220, 200, 200, 10)) # BLINK
             platforms.append(pygame.Rect(450, 200, 150, 15))
 
-            barriers.append(pygame.Rect(10, 400, 150, 10)) # BLIINK
             platforms.append(pygame.Rect(220, 400, 200, 15))
-            barriers.append(pygame.Rect(450, 400, 150, 10)) # BLINK
 
-            barriers.append(pygame.Rect(220, 600, 200, 10))
+            barriers.append(pygame.Rect(220, 700, 200, 10))
             platforms.append(pygame.Rect(450, 600, 150, 15))
+
+            if is_visible == True:
+                barriers.append(pygame.Rect(220, 200, 200, 10)) # BLINK
+                barriers.append(pygame.Rect(10, 400, 150, 10)) # BLIINK
+                barriers.append(pygame.Rect(450, 400, 150, 10)) # BLINK
 
 
         elif scene == 13: 
@@ -783,7 +796,8 @@ async def main ():
             barriers.append(pygame.Rect(120, 300, 120, 10)) 
             barriers.append(pygame.Rect(380, 300, 120, 10))
 
-            barriers.append(pygame.Rect(310, 500, 180, 10)) # BLINK
+            if is_visible == True:
+                barriers.append(pygame.Rect(240, 500, 180, 10)) # BLINK
 
             barriers.append(pygame.Rect(10, 790, 150, 10))
             barriers.append(pygame.Rect(440, 790, 150, 10))
@@ -792,7 +806,8 @@ async def main ():
         elif scene == 14:
             platforms.append(pygame.Rect(220, 200, 200, 15))
 
-            barriers.append(pygame.Rect(0, 300, 600, 10)) # BLINK
+            if is_visible == True:
+                barriers.append(pygame.Rect(0, 300, 600, 10)) # BLINK
 
             platforms.append(pygame.Rect(220, 500, 200, 15))
 
@@ -808,7 +823,8 @@ async def main ():
 
             platforms.append(pygame.Rect(10, 500, 200, 15))
 
-            barriers.append(pygame.Rect(220, 550, 100, 10)) # BLINK, connected to telephone
+            if is_visible:
+                barriers.append(pygame.Rect(220, 500, 400, 10)) # BLINK, connected to telephone
 
 
 
@@ -902,7 +918,6 @@ async def main ():
 
 
 
-
 # MAIN GAME LOOP
     while True:
         dt = clock.tick(60) / 1000
@@ -969,7 +984,12 @@ async def main ():
         
         if coin_yes == None:
             screen.blit(BG, (0,0))
-            barriers, platforms, structures, coin = get_scene(scene, coin_collected)
+            current_time = pygame.time.get_ticks()
+            
+            if current_time >= blink:
+                is_visible = not is_visible
+                blink = current_time + blink_time()
+            barriers, platforms, structures, coin = get_scene(scene, coin_collected, is_visible)
             walls()
 
             if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 18:
@@ -987,7 +1007,12 @@ async def main ():
             if scene == 3 and grounded == True and tut_track[7] == False:
                 idx = 7
                 tut_screen = True
- 
+
+            if (scene == 4 or scene == 8 or scene == 12 or scene == 16) and respawn == True:
+                x = 20
+                y = 100
+                respawn = False
+
             player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y)
             count(coin_count)
             
@@ -1166,9 +1191,7 @@ async def main ():
                     seq_played = False
 
             # Reset for next level
-            x = 20 
-            y = 100
-            print(x, " ", y)
+            respawn = True
             coin_collected = False
             
 
