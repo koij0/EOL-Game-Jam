@@ -235,7 +235,7 @@ async def main ():
         now = pygame.time.get_ticks()
     # Sprite Rendering
 
-        if touch_rope == True:
+        if touch_rope == True and grounded == False:
             character = PLAYER_CLIMB.get_rect(topleft = (x, y)) 
             screen.blit(PLAYER_CLIMB, character)
         elif jumped == True or grounded == False:
@@ -645,8 +645,6 @@ async def main ():
             platforms.append(pygame.Rect(10, 790, 100, 15))
 
             barriers.append(pygame.Rect(290, 790, 400, 10)) 
-
-            
        
 
         elif scene == 2:
@@ -663,9 +661,6 @@ async def main ():
             platforms.append(pygame.Rect(400, 650, 200, 15))
             
             platforms.append(pygame.Rect(100, 650, 100, 15)) # stairs
-
-
-
 
             if not coin_collected: 
                 coin = gen_coin(250, 300)
@@ -686,13 +681,17 @@ async def main ():
             platforms.append(pygame.Rect(150, 500, 100, 15))  
             platforms.append(pygame.Rect(10, 785, 300, 15))  
 
-            barriers.append(pygame.Rect(300, 400, 150, 10))
-
+            barriers.append(pygame.Rect(300, 500, 150, 10))
 
         
         elif scene == 5:
             platforms.append(pygame.Rect(200, 400, 200, 15))
             platforms.append(pygame.Rect(400, 785, 200, 15))
+
+            if not coin_collected: 
+                coin = gen_coin(250, 425)
+
+            structures.append(pygame.Rect(400, 400, 20, 100))
 
             barriers.append(pygame.Rect(420, 400, 120, 10))
             barriers.append(pygame.Rect(10, 790, 200, 10))
@@ -728,16 +727,21 @@ async def main ():
 
         elif scene == 9:
             platforms.append(pygame.Rect(300, 200, 300, 15))
-            barriers.append(pygame.Rect(10, 200, 300, 10))
+            barriers.append(pygame.Rect(10, 200, 300, 10)) # BLINK
 
             platforms.append(pygame.Rect(300, 400, 300, 15))
-            barriers.append(pygame.Rect(10, 400, 300, 10))
+            barriers.append(pygame.Rect(10, 400, 300, 10)) # BLINK
 
-            barriers.append(pygame.Rect(10, 600, 300, 10))
+            structures.append(pygame.Rect(300, 400, 20, 200))
+
+            if not coin_collected: 
+                coin = gen_coin(400, 500)
+
+            barriers.append(pygame.Rect(10, 600, 300, 10)) # BLINK 
 
 
             platforms.append(pygame.Rect(10, 785, 300, 15))
-            barriers.append(pygame.Rect(310, 790, 300, 10))
+            barriers.append(pygame.Rect(310, 790, 300, 10)) # BLINK
 
         elif scene == 10:
             platforms.append(pygame.Rect(200, 200, 200, 15))
@@ -750,20 +754,65 @@ async def main ():
             barriers.append(pygame.Rect(400, 750, 200, 10))
 
         elif scene == 11:
-            barriers.append(pygame.Rect(0, 250, 600, 10))
-            barriers.append(pygame.Rect(0, 450, 600, 10))
+            barriers.append(pygame.Rect(0, 250, 600, 10)) # BLINK
+            barriers.append(pygame.Rect(0, 450, 600, 10)) # BLINK
 
 
         # 3 - 
 
         elif scene == 12:
-            print("SCENE: ", scene)
-        elif scene == 13:
-            print("SCENE: ", scene)
+            platforms.append(pygame.Rect(10, 200, 150, 15))
+            barriers.append(pygame.Rect(220, 200, 200, 10)) # BLINK
+            platforms.append(pygame.Rect(450, 200, 150, 15))
+
+            barriers.append(pygame.Rect(10, 400, 150, 10)) # BLIINK
+            platforms.append(pygame.Rect(220, 400, 200, 15))
+            barriers.append(pygame.Rect(450, 400, 150, 10)) # BLINK
+
+            barriers.append(pygame.Rect(220, 600, 200, 10))
+            platforms.append(pygame.Rect(450, 600, 150, 15))
+
+
+        elif scene == 13: 
+            platforms.append(pygame.Rect(10, 200, 100, 15))
+            platforms.append(pygame.Rect(490, 200, 100, 15))
+
+            if not coin_collected: 
+                    coin = gen_coin(500, 120)
+
+            barriers.append(pygame.Rect(120, 300, 120, 10)) 
+            barriers.append(pygame.Rect(380, 300, 120, 10))
+
+            barriers.append(pygame.Rect(310, 500, 180, 10)) # BLINK
+
+            barriers.append(pygame.Rect(10, 790, 150, 10))
+            barriers.append(pygame.Rect(440, 790, 150, 10))
+            
+
         elif scene == 14:
-            print("SCENE: ", scene)
+            platforms.append(pygame.Rect(220, 200, 200, 15))
+
+            barriers.append(pygame.Rect(0, 300, 600, 10)) # BLINK
+
+            platforms.append(pygame.Rect(220, 500, 200, 15))
+
+            barriers.append(pygame.Rect(10, 750, 150, 10))
+            barriers.append(pygame.Rect(440, 750, 150, 10))
+
         elif scene == 15:
-            print("SCENE: ", scene)
+            platforms.append(pygame.Rect(250, 200, 150, 15))
+
+            barriers.append(pygame.Rect(400, 200, 200, 10))
+
+            platforms.append(pygame.Rect(120, 300, 100, 15))
+
+            platforms.append(pygame.Rect(10, 500, 200, 15))
+
+            barriers.append(pygame.Rect(220, 550, 100, 10)) # BLINK, connected to telephone
+
+
+
+
         # 4 - Final
 
         elif scene == 16:
@@ -1119,6 +1168,8 @@ async def main ():
             # Reset for next level
             x = 20 
             y = 100
+            print(x, " ", y)
+            coin_collected = False
             
 
         elif coin_yes == False:
