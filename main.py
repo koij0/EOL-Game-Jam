@@ -304,7 +304,7 @@ async def main ():
                     if keys[pygame.K_RIGHT] or keys[pygame.K_LEFT]:
                         swing = True
                         x_loc = rope_points[-1][0] - 22
-                        y_loc = rope_points[-1][1] - 22
+                        y_loc = rope_points[-3][1] - 22
 
                     else:
                         swing = False
@@ -671,30 +671,88 @@ async def main ():
                 coin = gen_coin(250, 300)
            
         elif scene == 3:
-            structures.append(box(200, 0, 240, 400))
-            structures.append(Polygon([(200, 350), (200, 450), (350, 450)]))
+            structures.append(pygame.Rect(200, 0, 40, 300))
+            structures.append(Polygon([(200, 250), (200, 350), (350, 350)]))
+
+            barriers.append(pygame.Rect(240, 275, 350, 10))
+
 
 
         # 1 -   
 
         elif scene == 4:
-            print("SCENE: ", scene)
+            platforms.append(pygame.Rect(10, 200, 200, 15))  
+            platforms.append(pygame.Rect(500, 400, 100, 15))   
+            platforms.append(pygame.Rect(150, 500, 100, 15))  
+            platforms.append(pygame.Rect(10, 785, 300, 15))  
+
+            barriers.append(pygame.Rect(300, 400, 150, 10))
+
+
+        
         elif scene == 5:
-            print("SCENE: ", scene)
+            platforms.append(pygame.Rect(200, 400, 200, 15))
+            platforms.append(pygame.Rect(400, 785, 200, 15))
+
+            barriers.append(pygame.Rect(420, 400, 120, 10))
+            barriers.append(pygame.Rect(10, 790, 200, 10))
+
+
         elif scene == 6:
-            print("SCENE: ", scene)
+            platforms.append(pygame.Rect(10, 200, 200, 15))
+            platforms.append(pygame.Rect(210, 500, 200, 15))
+
+            barriers.append(pygame.Rect(220, 250, 100, 10))
+            barriers.append(pygame.Rect(420, 550, 100, 10))
+            
         elif scene == 7:
-            print("SCENE: ", scene)
+            barriers.append(pygame.Rect(10, 300, 200, 10))
+
         # 2 - 
 
         elif scene == 8:
-            print("SCENE: ", scene)
+            platforms.append(pygame.Rect(10, 200, 150, 15))
+            platforms.append(pygame.Rect(300, 200, 150, 15))
+
+            barriers.append(pygame.Rect(180, 250, 100, 10))
+
+            platforms.append(pygame.Rect(390, 450, 200, 15))
+
+            barriers.append(pygame.Rect(280, 500, 100, 10))
+
+            platforms.append(pygame.Rect(10, 750, 150, 15))
+            platforms.append(pygame.Rect(300, 750, 150, 15))
+            
+            barriers.append(pygame.Rect(180, 775, 100, 10))
+
+
         elif scene == 9:
-            print("SCENE: ", scene)
+            platforms.append(pygame.Rect(300, 200, 300, 15))
+            barriers.append(pygame.Rect(10, 200, 300, 10))
+
+            platforms.append(pygame.Rect(300, 400, 300, 15))
+            barriers.append(pygame.Rect(10, 400, 300, 10))
+
+            barriers.append(pygame.Rect(10, 600, 300, 10))
+
+
+            platforms.append(pygame.Rect(10, 785, 300, 15))
+            barriers.append(pygame.Rect(310, 790, 300, 10))
+
         elif scene == 10:
-            print("SCENE: ", scene)
+            platforms.append(pygame.Rect(200, 200, 200, 15))
+            barriers.append(pygame.Rect(400, 200, 200, 10))
+
+            platforms.append(pygame.Rect(200, 450, 200, 15))
+            barriers.append(pygame.Rect(0, 450, 200, 10))
+
+            platforms.append(pygame.Rect(200, 750, 200, 15))
+            barriers.append(pygame.Rect(400, 750, 200, 10))
+
         elif scene == 11:
-            print("SCENE: ", scene)
+            barriers.append(pygame.Rect(0, 250, 600, 10))
+            barriers.append(pygame.Rect(0, 450, 600, 10))
+
 
         # 3 - 
 
@@ -852,7 +910,8 @@ async def main ():
 
                 if tut_screen == True:
                     if event.key == pygame.K_RETURN:
-                        idx += 1
+                        if throw_rope == True:
+                            idx += 1
                         tut_screen = False
             
                         
@@ -876,6 +935,10 @@ async def main ():
                 if tut_screen == True:
                     tutorial(tut_text, idx, tut_track)
 
+            if scene == 3 and grounded == True and tut_track[7] == False:
+                idx = 7
+                tut_screen = True
+ 
             player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y)
             count(coin_count)
             
@@ -887,6 +950,7 @@ async def main ():
         # ROPE
             if throw_rope == True:
                 if scene == 1 and tut_track[2] == False:
+                        idx = 2
                         tut_screen = True
                 elif scene == 1 and tut_track[3] == False:
                     tut_screen = True
@@ -950,7 +1014,7 @@ async def main ():
 
         # Lives
             if hit_barrier == True:
-                if scene <= 2 and tut_track[6] == False:
+                if scene <= 3 and tut_track[6] == False:
                     idx = 6
                     tut_screen = True
                 if life == False: 
@@ -972,6 +1036,7 @@ async def main ():
             #tut
             if scene == 1 and tut_track[1] == False:
                 if character.colliderect(platforms[3]):
+                    idx = 1
                     tut_screen = True
 
             if scene == 2 and tut_track[5] == False:
@@ -1039,7 +1104,6 @@ async def main ():
             if seq_played == True:
                 if call == True:
                     order, phone_answer, lives = phone_call(order, phone_script, phone_answer, lives) 
-                    print("ORDER, ", order)
                     if phone_answer != None:
                         call = None
                         s = 0
@@ -1051,6 +1115,10 @@ async def main ():
                     call = None
                     s = 0
                     seq_played = False
+
+            # Reset for next level
+            x = 20 
+            y = 100
             
 
         elif coin_yes == False:
