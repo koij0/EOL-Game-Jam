@@ -122,6 +122,8 @@ async def main ():
     is_visible = False
 
     phone_ringing = False
+
+    mood = 0
     
     
 
@@ -233,6 +235,12 @@ async def main ():
         pygame.draw.rect(screen, BLACK, wall1)
         pygame.draw.rect(screen, BLACK, wall2)
         return wall1, wall2
+
+    def darkness(x, y, mood):
+        dark = pygame.Surface((600, 800))
+        dark.fill((107-(mood*20), 107-(mood*20), 107-(mood*20)))
+        pygame.draw.circle(dark, (255, 255, 255), (x,y), (200-(mood*50)))
+        screen.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
 
 
 # TEXT
@@ -932,7 +940,7 @@ async def main ():
 
 # PHONE BOOTH CUT-SCENES
 
-    def phone_call(order, phone_script, phone_answer, lives):
+    def phone_call(order, phone_script, phone_answer, lives, mood):
         screen.fill((0, 0, 0))
     # Intro 
         if order == 0: 
@@ -955,6 +963,7 @@ async def main ():
             
             if phone_answer == True:
                 lives = lose_life(lives)
+                mood += 1
                 
                 
     # 2 - “Are you safe?”
@@ -967,6 +976,7 @@ async def main ():
 
             if phone_answer == False:
                 lives = lose_life(lives)
+                mood += 1
                 
     # 3 - “Do you need help?”
         elif order == 3: 
@@ -978,6 +988,7 @@ async def main ():
 
             if phone_answer == False:
                 lives = lose_life(lives)
+                mood += 1
                 
     # 4 - You’ve reached the end of the line…
         elif order == 4: 
@@ -986,8 +997,7 @@ async def main ():
     # Ending 1 
 
     # Ending 2
-
-        return order, phone_answer, lives
+        return order, phone_answer, lives, mood
         
 
 
@@ -1058,6 +1068,9 @@ async def main ():
         if coin_yes == None:
             screen.blit(BG, (0,0))
             current_time = pygame.time.get_ticks()
+
+            
+
             
             if current_time >= blink:
                 is_visible = not is_visible
@@ -1087,7 +1100,7 @@ async def main ():
                 respawn = False
 
             player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y)
-            count(coin_count)
+            
             
 
         
@@ -1186,9 +1199,6 @@ async def main ():
                 print("END GAME")
 
 
-        # Hearts
-            heart(lives)
-
         # Platforms
 
             #tut
@@ -1220,9 +1230,6 @@ async def main ():
 
                 else:
                     grounded = False
-
-            
-
             
 
         # Structures
@@ -1242,6 +1249,15 @@ async def main ():
                         x = character.left
                     
                         break
+
+            # Darkness
+            darkness(x, y, mood)
+
+            # Coin Count Display
+            count(coin_count)
+
+            # Hearts
+            heart(lives)
 
         elif coin_yes == True:
 
@@ -1275,7 +1291,7 @@ async def main ():
                     if phone_ringing == False:
                         RINGTONE.play(-1)  
                         phone_ringing = True
-                    order, phone_answer, lives = phone_call(order, phone_script, phone_answer, lives) 
+                    order, phone_answer, lives, mood = phone_call(order, phone_script, phone_answer, lives, mood) 
                     if phone_answer != None:
                         RINGTONE.stop()
                         phone_ringing = False
@@ -1299,10 +1315,10 @@ async def main ():
             heart_collected = False
 
 
+
         elif coin_yes == False:
             x = 390
             coin_yes = None
-
 
         
         pygame.display.flip()
