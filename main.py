@@ -197,6 +197,23 @@ async def main ():
 
     RINGTONE = pygame.mixer.Sound("sfx/ringtone.wav")
 
+    SFX_WALK1 = pygame.mixer.Sound("sfx/walk1.wav")
+    SFX_WALK2 = pygame.mixer.Sound("sfx/walk2.wav")
+    SFX_WALK = [SFX_WALK1, SFX_WALK2]
+  #  SFX_JUMP = pygame.mixer.Sound("sfx/jump.wav")
+
+    SFX_THROW = pygame.mixer.Sound("sfx/throw.wav")
+
+
+    SFX_COIN = pygame.mixer.Sound("sfx/coin.wav")
+    SFX_USE_COIN = pygame.mixer.Sound("sfx/use_coin.wav")
+    SFX_BEEP = pygame.mixer.Sound("sfx/beep.wav")
+    SFX_CLICK = pygame.mixer.Sound("sfx/click.wav")
+
+
+    
+
+
 
     # Font
     font = pygame.font.Font('nokiafc22.ttf', 24)
@@ -247,14 +264,17 @@ async def main ():
             character = PLAYER_CLIMB.get_rect(topleft = (x, y)) 
             screen.blit(PLAYER_CLIMB, character)
         elif jumped == True: # or grounded == False:
+          #  SFX_JUMP.play()
             character = PLAYER_JUMP.get_rect(topleft = (x, y)) 
             screen.blit(PLAYER_JUMP, character)
         elif walking_l == True or walking_r == True:
             if now -  animate_time > 200:
                 animate_time = now
                 frame = (frame + 1) % len(PLAYER_WALK)
+                SFX_WALK[frame].play()
 
             walk = PLAYER_WALK[frame]
+            
 
             if walking_l == True: 
                 walk = pygame.transform.flip(walk, True, False)
@@ -501,11 +521,13 @@ async def main ():
 
     # Collect
     def get_coin(coin):
+        SFX_COIN.play()
         coin += 1
         return coin
 
     # Use
     def use_coin(coin):
+        SFX_USE_COIN.play()
         coin -= 1
         return coin
 
@@ -559,6 +581,7 @@ async def main ():
     
         for i, button in enumerate(buttons):
             if button.collidepoint(mouse_pos):
+                SFX_CLICK.play()
                 if s < len(sequence) and i == sequence[s]:
                     s += 1
                     flash_timer = {
@@ -612,6 +635,9 @@ async def main ():
             if elapsed >= flash_timer['duration']:
                 flash_timer['step'] += 1
                 flash_timer['start_time'] = current_time
+                
+                if flash_timer['step'] % 2 == 0:
+                    SFX_BEEP.play()
 
                 if flash_timer['step'] >= len(flash_timer['sequence']) * 2:
                     return None
@@ -960,24 +986,26 @@ async def main ():
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos  
-                if seq_played == True:   
-                    s, flash_timer, call = dial(buttons, sequence, mouse_pos, s, flash_timer)
+                if phone_ringing == False:
+                    if seq_played == True:   
+                        s, flash_timer, call = dial(buttons, sequence, mouse_pos, s, flash_timer)
 
-                elif event.button == 1:
-                    x_rope, y_rope = mouse_pos
-                    rope_points = []
-                    for i in range(SEGMENTS):
-                        rope_points.append([x_rope, y_rope + i * SEGMENT_LENGTH, x_rope, y_rope + i * SEGMENT_LENGTH])
-                    rope_points[1][0] += random.uniform(-5, 5)
+                    elif event.button == 1:
+                        SFX_THROW.play()
+                        x_rope, y_rope = mouse_pos
+                        rope_points = []
+                        for i in range(SEGMENTS):
+                            rope_points.append([x_rope, y_rope + i * SEGMENT_LENGTH, x_rope, y_rope + i * SEGMENT_LENGTH])
+                        rope_points[1][0] += random.uniform(-5, 5)
 
 
-                    # Reset swing physics
-                    angle = 0
-                    angle_velocity = 0
-                    swing = False
+                        # Reset swing physics
+                        angle = 0
+                        angle_velocity = 0
+                        swing = False
 
-                    throw_rope = True
-                    time = 5
+                        throw_rope = True
+                        time = 5
 
             if event.type == pygame.KEYDOWN:
                 if coin_yes == None:
@@ -1209,7 +1237,6 @@ async def main ():
                     if phone_ringing == False:
                         RINGTONE.play(-1)  
                         phone_ringing = True
-                    RINGTONE.play()
                     order, phone_answer, lives = phone_call(order, phone_script, phone_answer, lives) 
                     if phone_answer != None:
                         RINGTONE.stop()
