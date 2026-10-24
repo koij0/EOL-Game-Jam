@@ -75,6 +75,7 @@ async def main ():
 
     coin_count = 1
     coin_collected = False
+    heart_collected = False
     order = 0
     coin_yes = None
     phone_answer = None
@@ -536,13 +537,26 @@ async def main ():
         draw_text(f"Coins: {count}", 25, 25)
 
 # LIVES
-    # Generate
+    # Count
     def heart(lives):
         heart = []
+        if lives > 9:
+            lives = 9
         for i in range(lives):
             heart.append(HEART.get_rect(topleft = (560 - (i*25), 20)))
             screen.blit(HEART, heart[i])
         return heart
+
+    # Generate
+    def gen_heart(x, y):
+            heart = [HEART.get_rect(topleft = (x, y))] 
+            screen.blit(HEART, heart[0])
+            return heart
+    
+    # Collect
+    def get_heart(lives):
+        lives += 1
+        return lives
     
     # Lose
     def lose_life(lives):
@@ -669,11 +683,12 @@ async def main ():
 
 
 # LEVEL / SCENES
-    def get_scene(scene, coin_collected, is_visible):
+    def get_scene(scene, coin_collected, heart_collected, is_visible):
         barriers = []
         platforms = []
         structures = []
         coin = []
+        hearts = []
     # 0 - Phone Call / Home 
 
         if scene == 1:
@@ -699,12 +714,15 @@ async def main ():
 
             platforms.append(pygame.Rect(200, 400, 200, 15))
 
-            platforms.append(pygame.Rect(400, 650, 200, 15))
+            platforms.append(pygame.Rect(400, 680, 200, 15))
             
-            platforms.append(pygame.Rect(120, 650, 100, 15)) # stairs
+            platforms.append(pygame.Rect(120, 680, 100, 15)) 
 
             if not coin_collected: 
                 coin = gen_coin(250, 300)
+
+            if not heart_collected: 
+                hearts = gen_heart(490, 650)
            
         elif scene == 3:
             structures.append(pygame.Rect(200, 0, 40, 300))
@@ -730,9 +748,13 @@ async def main ():
         elif scene == 5: 
             platforms.append(pygame.Rect(310, 200, 100, 15))
             platforms.append(pygame.Rect(400, 720, 200, 15))
+            platforms.append(pygame.Rect(10, 200, 100, 15))
 
             if not coin_collected: 
                 coin = gen_coin(150, 425)
+
+            if not heart_collected: 
+                hearts = gen_heart(50, 150)
 
             structures.append(pygame.Rect(350, 410, 20, 100))
 
@@ -779,7 +801,10 @@ async def main ():
             structures.append(pygame.Rect(300, 410, 20, 200))
 
             if not coin_collected: 
-                coin = gen_coin(400, 500)
+                coin = gen_coin(440, 500)
+
+            if not heart_collected: 
+                hearts = gen_heart(450, 350)
 
             platforms.append(pygame.Rect(10, 785, 400, 15))
 
@@ -789,7 +814,7 @@ async def main ():
                 barriers.append(pygame.Rect(420, 790, 180, 10)) # BLINK
             
 
-        elif scene == 10: ### EDIT -- the landing platform should be on the Right
+        elif scene == 10: 
             platforms.append(pygame.Rect(400, 200, 200, 15))
             barriers.append(pygame.Rect(290, 230, 100, 10))
             platforms.append(pygame.Rect(130, 200, 150, 15))
@@ -810,7 +835,7 @@ async def main ():
 
         # 3 - 
 
-        elif scene == 12: ### EDIT -- Make All blink
+        elif scene == 12: 
             platforms.append(pygame.Rect(10, 200, 150, 15))
             platforms.append(pygame.Rect(450, 200, 150, 15))
 
@@ -837,7 +862,10 @@ async def main ():
             platforms.append(pygame.Rect(490, 200, 100, 15))
 
             if not coin_collected: 
-                    coin = gen_coin(500, 120)
+                coin = gen_coin(500, 120)
+
+            if not heart_collected: 
+                hearts = gen_heart(40, 130)
 
 
             if is_visible == True:
@@ -899,7 +927,7 @@ async def main ():
                 pygame.draw.rect(screen, BLACK, structure)
                 
 
-        return barriers, platforms, structures, coin
+        return barriers, platforms, structures, coin, hearts
 
 
 # PHONE BOOTH CUT-SCENES
@@ -1034,7 +1062,7 @@ async def main ():
             if current_time >= blink:
                 is_visible = not is_visible
                 blink = current_time + blink_time()
-            barriers, platforms, structures, coin = get_scene(scene, coin_collected, is_visible)
+            barriers, platforms, structures, coin, hearts = get_scene(scene, coin_collected, heart_collected, is_visible)
             walls()
 
             if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 18:
@@ -1086,11 +1114,21 @@ async def main ():
 
      # COLLISIONS
 
+            # coins
             if len(coin) > 0: ## FIX 
                 if character.colliderect(coin[0]):
                     coin_count = get_coin(coin_count)
                     coin_collected = True
                     coin.remove(coin[0])
+
+            # hearts
+            if len(hearts) > 0: ## FIX 
+                if character.colliderect(hearts[0]):
+                    lives = get_heart(lives)
+                    heart_collected = True
+                    hearts.remove(hearts[0])
+
+                          
 
             if scene == 3 or scene == 7 or scene == 11 or scene == 15:
                 draw_phonebooth()
@@ -1149,7 +1187,7 @@ async def main ():
 
 
         # Hearts
-            hearts = heart(lives)
+            heart(lives)
 
         # Platforms
 
@@ -1258,6 +1296,7 @@ async def main ():
             # Reset for next level
             respawn = True
             coin_collected = False
+            heart_collected = False
 
 
         elif coin_yes == False:
