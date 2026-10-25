@@ -251,7 +251,6 @@ async def main ():
     def ground():
     # Ground
         ground = pygame.Rect((0, GROUND, SCREEN_WIDTH, 150))
-        pygame.draw.rect(screen, BLACK, ground)
         return ground
 
     def walls():
@@ -726,8 +725,9 @@ async def main ():
             platforms.append(pygame.Rect(390, 520, 200, 15)) # landing
             platforms.append(pygame.Rect(110, 520, 100, 15)) # landing
             platforms.append(pygame.Rect(10, 790, 100, 15))
-            
-            barriers.append([pygame.transform.scale(WIRE2, (400, 60)), (pygame.transform.scale(WIRE2, (400, 60))).get_rect(topleft = (290, 750))]) 
+
+            platforms.append(pygame.Rect(260, 790, 150, 15))
+            # barriers.append([pygame.transform.scale(WIRE2, (400, 60)), (pygame.transform.scale(WIRE2, (400, 60))).get_rect(topleft = (290, 750))]) 
        
 
         elif scene == 2:
@@ -737,25 +737,34 @@ async def main ():
             platforms.append(pygame.Rect(120, 200, 200, 15))
             platforms.append(pygame.Rect(290, 200, 200, 15))
 
-            barriers.append([pygame.transform.scale(WIRE2, (200, 60)), (pygame.transform.scale(WIRE2, (200, 60))).get_rect(topleft = (400, 460))]) 
+            structures.append(pygame.Rect(250, 415, 30, 280))
 
-            platforms.append(pygame.Rect(200, 400, 200, 15))
+            platforms.append(pygame.Rect(120, 400, 310, 15))
+
+            structures.append(pygame.Rect(400, 415, 30, 280))
+
 
             platforms.append(pygame.Rect(400, 680, 200, 15))
             
-            platforms.append(pygame.Rect(120, 680, 100, 15)) 
+            platforms.append(pygame.Rect(0, 680, 120, 15)) 
 
             if not coin_collected: 
-                coin = gen_coin(250, 300)
+                coin = gen_coin(480, 620)
 
-            if not heart_collected: 
-                hearts = gen_heart(490, 650)
+
            
         elif scene == 3:
-            structures.append(pygame.Rect(200, 0, 40, 300))
-            structures.append(Polygon([(200, 250), (200, 350), (350, 350)]))
+            structures.append(pygame.Rect(210, 0, 40, 300))
+            structures.append(Polygon([(210, 260), (210, 360), (360, 360)]))
 
-            barriers.append([pygame.transform.scale(WIRE2, (360, 60)), (pygame.transform.scale(WIRE2, (350, 60))).get_rect(topleft = (230, 235))]) 
+            platforms.append(pygame.Rect(0, 500, 250, 150)) 
+            platforms.append(pygame.Rect(250, 550, 100, 100)) 
+            platforms.append(pygame.Rect(350, 600, 100, 50)) 
+
+
+
+
+            barriers.append([pygame.transform.scale(WIRE2, (360, 60)), (pygame.transform.scale(WIRE2, (360, 60))).get_rect(topleft = (240, 235))]) 
 
 
 
@@ -1138,11 +1147,13 @@ async def main ():
             walls()
 
             if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 18:
-                ground()
+                floor = ground()
+                pygame.draw.rect(screen, BLACK, floor)
+
                 # Rope hits ground/platforms/etc
                 for i in range(len(rope_points)):
-                    if ground().collidepoint(rope_points[i][0], rope_points[i][1]):
-                        rope_points[i][1] = ground().top
+                    if floor.collidepoint(rope_points[i][0], rope_points[i][1]):
+                        rope_points[i][1] = floor.top
 
             # TUT
             if scene <= 3:
