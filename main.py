@@ -123,7 +123,6 @@ async def main ():
 
     phone_ringing = False
 
-    mood = 0
     
     
 
@@ -195,6 +194,28 @@ async def main ():
     PHONE = pygame.image.load("sprites/phone.png").convert_alpha()
     PHONE = pygame.transform.scale(PHONE, (100, 150))
 
+    # Buttons
+
+    # Red
+    RED_BUTTONS = []
+    for i in range(10):
+        RED_BUTTON = pygame.image.load(f"sprites/red/r{i+1}.png").convert_alpha()
+        RED_BUTTON = pygame.transform.scale(RED_BUTTON, (100, 100))
+        RED_BUTTONS.append(RED_BUTTON)
+
+    # Blue
+    BLUE_BUTTONS = []
+    for i in range(10):
+        BLUE_BUTTON = pygame.image.load(f"sprites/blue/b{i+1}.png").convert_alpha()
+        BLUE_BUTTON = pygame.transform.scale(BLUE_BUTTON, (100, 100))
+        BLUE_BUTTONS.append(BLUE_BUTTON)
+
+    # Green
+    GREEN_BUTTONS = []
+    for i in range(10):
+        GREEN_BUTTON = pygame.image.load(f"sprites/green/g{i+1}.png").convert_alpha()
+        GREEN_BUTTON = pygame.transform.scale(GREEN_BUTTON, (100, 100))
+        GREEN_BUTTONS.append(GREEN_BUTTON)
 
     # Audio
 
@@ -203,7 +224,7 @@ async def main ():
     SFX_WALK1 = pygame.mixer.Sound("sfx/walk1.wav")
     SFX_WALK2 = pygame.mixer.Sound("sfx/walk2.wav")
     SFX_WALK = [SFX_WALK1, SFX_WALK2]
-  #  SFX_JUMP = pygame.mixer.Sound("sfx/jump.wav")
+  # SFX_JUMP = pygame.mixer.Sound("sfx/jump.wav")
 
     SFX_THROW = pygame.mixer.Sound("sfx/throw.wav")
 
@@ -236,11 +257,7 @@ async def main ():
         pygame.draw.rect(screen, BLACK, wall2)
         return wall1, wall2
 
-    def darkness(x, y, mood):
-        dark = pygame.Surface((600, 800))
-        dark.fill((107-(mood*20), 107-(mood*20), 107-(mood*20)))
-        pygame.draw.circle(dark, (255, 255, 255), (x,y), (200-(mood*50)))
-        screen.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+   
 
 
 # TEXT
@@ -307,13 +324,15 @@ async def main ():
             if keys[pygame.K_LEFT]:
                 x_loc -= PLAYER_SPEED
                 walking_l = True
+                
             if keys[pygame.K_RIGHT]:
                 x_loc += PLAYER_SPEED
                 walking_r = True
+            
             if keys[pygame.K_UP]:
                 y_loc += JUMP_FORCE
                 grounded = False
-                jumped = True
+                jumped = True    
             
 
 
@@ -582,15 +601,15 @@ async def main ():
     # Phone Screen
     def phone_buttons(buttons):
         screen.fill((0, 0, 0))
-        for button in buttons:
-            pygame.draw.rect(screen, (0, 0, 255), button)
+        for i in range(len(buttons)):
+            screen.blit(BLUE_BUTTONS[i], buttons[i])
 
     # Phone sequence
     def phone_sequence(sequence, current_time):
         flash_timer = {
             'sequence': sequence,
             'step': 0,
-            'color': (0, 225, 0),
+            'sprite': GREEN_BUTTONS,
             'start_time': current_time,
             'duration': 500
             }
@@ -608,7 +627,7 @@ async def main ():
                     s += 1
                     flash_timer = {
                         'index': i,
-                        'color': (0, 255, 0),
+                        'sprite': GREEN_BUTTONS,
                         'start_time': current_time,
                         'duration': 300
                     }
@@ -620,7 +639,7 @@ async def main ():
 
                 flash_timer = {
                     'index': i,
-                    'color': (255, 0, 0),
+                    'sprite': RED_BUTTONS,
                     'start_time': current_time,
                     'duration': 1000,
                     'wrong': True
@@ -637,18 +656,18 @@ async def main ():
 
         elapsed = current_time - flash_timer['start_time']
     
-        if 'index' in flash_timer and 'color' in flash_timer:
+        if 'index' in flash_timer and 'sprite' in flash_timer:
             if elapsed >= flash_timer['duration']:
                 return None
 
             index = flash_timer['index']
-            color = flash_timer['color']
+            color = flash_timer['sprite']
 
             for i, button in enumerate(buttons):
                 if i == index:
-                    pygame.draw.rect(screen, color, button)
+                    screen.blit(color[i], button)
                 else:
-                    pygame.draw.rect(screen, (0, 0, 255), button)
+                    screen.blit(BLUE_BUTTONS[i], button)
 
             return flash_timer
 
@@ -668,26 +687,22 @@ async def main ():
             index = flash_timer['sequence'][step // 2]
 
             if step % 2 == 0:
-                color = (0, 225, 0)  
+                color = GREEN_BUTTONS  
             else:
-                color = (0, 0, 255)  
+                color = BLUE_BUTTONS
 
             for i, button in enumerate(buttons):
                 if i == index:
-                    pygame.draw.rect(screen, color, button)
+                    screen.blit(color[i], button)
                 else:
-                    pygame.draw.rect(screen, (0, 0, 255), button)
+                    screen.blit(BLUE_BUTTONS[i], button)
 
             return flash_timer
 
         return None
 
 
-# BLINKING BARRIERS
-    def blink_time():
-        return random.randint(1000, 4000)
-
-    blink = pygame.time.get_ticks() + blink_time()
+    blink = pygame.time.get_ticks() + 4000
 
 
 # LEVEL / SCENES
@@ -940,7 +955,7 @@ async def main ():
 
 # PHONE BOOTH CUT-SCENES
 
-    def phone_call(order, phone_script, phone_answer, lives, mood):
+    def phone_call(order, phone_script, phone_answer, lives):
         screen.fill((0, 0, 0))
     # Intro 
         if order == 0: 
@@ -963,7 +978,6 @@ async def main ():
             
             if phone_answer == True:
                 lives = lose_life(lives)
-                mood += 1
                 
                 
     # 2 - “Are you safe?”
@@ -976,7 +990,6 @@ async def main ():
 
             if phone_answer == False:
                 lives = lose_life(lives)
-                mood += 1
                 
     # 3 - “Do you need help?”
         elif order == 3: 
@@ -988,7 +1001,6 @@ async def main ():
 
             if phone_answer == False:
                 lives = lose_life(lives)
-                mood += 1
                 
     # 4 - You’ve reached the end of the line…
         elif order == 4: 
@@ -997,7 +1009,7 @@ async def main ():
     # Ending 1 
 
     # Ending 2
-        return order, phone_answer, lives, mood
+        return order, phone_answer, lives
         
 
 
@@ -1010,6 +1022,7 @@ async def main ():
         rope_points[0][1] = y_rope
         rope_points[0][2] = x_rope
         rope_points[0][3] = y_rope
+
                             
 
 # Check Events
@@ -1074,7 +1087,7 @@ async def main ():
             
             if current_time >= blink:
                 is_visible = not is_visible
-                blink = current_time + blink_time()
+                blink = current_time + 4000
             barriers, platforms, structures, coin, hearts = get_scene(scene, coin_collected, heart_collected, is_visible)
             walls()
 
@@ -1250,8 +1263,7 @@ async def main ():
                     
                         break
 
-            # Darkness
-            darkness(x, y, mood)
+           
 
             # Coin Count Display
             count(coin_count)
@@ -1291,7 +1303,7 @@ async def main ():
                     if phone_ringing == False:
                         RINGTONE.play(-1)  
                         phone_ringing = True
-                    order, phone_answer, lives, mood = phone_call(order, phone_script, phone_answer, lives, mood) 
+                    order, phone_answer, lives = phone_call(order, phone_script, phone_answer, lives) 
                     if phone_answer != None:
                         RINGTONE.stop()
                         phone_ringing = False
