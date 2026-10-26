@@ -604,7 +604,7 @@ async def main ():
 
     # Phone Screen
     def phone_buttons(buttons):
-        screen.fill((23, 28, 20))
+        screen.fill((19, 13, 26))
         for i in range(len(buttons)):
             screen.blit(BLUE_BUTTONS[i], buttons[i])
 
