@@ -47,8 +47,8 @@ async def main ():
     DAMPING = 0.97
 
     # Colors 
-    GREY = (128, 128, 128) # Grey
-    PLAYER_COLOR = (82, 14, 125) # Purple
+    GREY = (128, 151, 179) # Grey-blue
+    PURPLE = (45, 27, 61) # Purple
     BLACK = (0, 0, 0) # Black
     WHITE = (255, 255, 255) # White
     TEAL = (0, 143, 145) # Teal
@@ -429,7 +429,7 @@ async def main ():
             x_loc = SCREEN_WIDTH - 100 
 
         # Ground
-        if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 18:
+        if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 16:
             if y_loc > GROUND - 110:
                 y_loc = GROUND - 110
                 grounded = True
@@ -772,15 +772,15 @@ async def main ():
         elif scene == 4:
             platforms.append(pygame.Rect(10, 200, 200, 15))  
             platforms.append(pygame.Rect(500, 400, 100, 15))   
-            platforms.append(pygame.Rect(250, 450, 100, 15))  
+            platforms.append(pygame.Rect(250, 470, 100, 15))  
             platforms.append(pygame.Rect(10, 785, 300, 15))  
 
             barriers.append([pygame.transform.scale(WIRE2, (100, 60)), (pygame.transform.scale(WIRE2, (100, 60))).get_rect(topleft = (210, 250))]) 
             barriers.append([pygame.transform.scale(WIRE2, (150, 60)), (pygame.transform.scale(WIRE2, (150, 60))).get_rect(topleft = (350, 500))]) 
             
             structures.append(pygame.Rect(180, 215, 30, 70)) 
-            structures.append(pygame.Rect(320, 465, 30, 70)) 
-            structures.append(pygame.Rect(500, 415, 30, 120)) 
+            structures.append(pygame.Rect(320, 485, 30, 55)) 
+            structures.append(pygame.Rect(500, 415, 30, 120))  
 
 
         
@@ -805,8 +805,8 @@ async def main ():
             platforms.append(pygame.Rect(10, 200, 300, 15))
             platforms.append(pygame.Rect(210, 500, 200, 15))
 
-            barriers.append([pygame.transform.scale(WIRE2, (100, 60)), (pygame.transform.scale(WIRE2, (100, 60))).get_rect(topleft = (315, 250))]) 
-            barriers.append([pygame.transform.scale(WIRE2, (200, 60)), (pygame.transform.scale(WIRE2, (200, 60))).get_rect(topleft = (415, 550))]) 
+            barriers.append([pygame.transform.scale(WIRE2, (110, 60)), (pygame.transform.scale(WIRE2, (110, 60))).get_rect(topleft = (310, 250))]) 
+            barriers.append([pygame.transform.scale(WIRE2, (210, 60)), (pygame.transform.scale(WIRE2, (210, 60))).get_rect(topleft = (410, 550))]) 
            
             barriers.append([pygame.transform.scale(WIRE2, (150, 60)), (pygame.transform.scale(WIRE2, (150, 60))).get_rect(topleft = (10, 750))]) 
 
@@ -825,10 +825,10 @@ async def main ():
             platforms.append(pygame.Rect(10, 150, 150, 15))
             platforms.append(pygame.Rect(290, 150, 150, 15))
 
-            structures.append(pygame.Rect(130, 165, 30, 70)) 
-            structures.append(pygame.Rect(290, 165, 30, 70)) 
+            structures.append(pygame.Rect(130, 165, 30, 90)) 
+            structures.append(pygame.Rect(290, 165, 30, 90)) 
 
-            barriers.append([pygame.transform.scale(WIRE2, (130, 60)), (pygame.transform.scale(WIRE2, (130, 60))).get_rect(topleft = (10, 200))]) 
+            barriers.append([pygame.transform.scale(WIRE2, (130, 60)), (pygame.transform.scale(WIRE2, (130, 60))).get_rect(topleft = (160, 220))]) 
 
             platforms.append(pygame.Rect(440, 450, 150, 15))
             structures.append(pygame.Rect(440, 465, 30, 70)) 
@@ -878,7 +878,7 @@ async def main ():
         elif scene == 10: 
             platforms.append(pygame.Rect(400, 200, 200, 15))
             barriers.append([pygame.transform.scale(WIRE2, (120, 60)), (pygame.transform.scale(WIRE2, (120, 60))).get_rect(topleft = (280, 250))]) 
-            platforms.append(pygame.Rect(130, 200, 100, 15))
+            platforms.append(pygame.Rect(160, 200, 120, 15))
 
             structures.append(pygame.Rect(400, 215, 30, 70)) 
             structures.append(pygame.Rect(250, 215, 30, 70)) 
@@ -1004,7 +1004,33 @@ async def main ():
         # 4 - Final
 
         elif scene == 16:
-            print("SCENE: ", scene)
+            platforms.append(pygame.Rect(120, 600, 50, 20)) 
+            structures.append(Polygon([(120, 600), (220, 600), (220, 650), (120, 650)]))
+            platforms.append(pygame.Rect(220, 550, 50, 20)) 
+            structures.append(Polygon([(220, 550), (320, 550), (320, 650), (220, 650)]))
+            platforms.append(pygame.Rect(320, 500, 100, 20)) 
+            structures.append(Polygon([(320, 500), (420, 500), (420, 650), (320, 650)]))
+            structures.append(pygame.Rect(410, 515, 10, 135))
+
+            # telephone pole
+            structures.append(Polygon([(460, 200), (490, 200), (490, 650), (460, 650)]))
+
+            structures.append(Polygon([(410, 350), (540, 350), (540, 370), (410, 370)]))
+            
+            structures.append(Polygon([(420, 370), (425, 370), (465, 410), (460, 410)]))
+            structures.append(Polygon([(530, 370), (525, 370), (485, 410), (490, 410)]))
+
+            structures.append(Polygon([(410, 285), (540, 285), (540, 305), (410, 305)]))
+
+            structures.append(Polygon([(420, 305), (425, 305), (465, 345), (460, 345)]))
+            structures.append(Polygon([(530, 305), (525, 305), (485, 345), (490, 345)]))
+
+            structures.append(Polygon([(410, 220), (540, 220), (540, 240), (410, 240)])) 
+
+            structures.append(Polygon([(420, 240), (425, 240), (465, 280), (460, 280)]))
+            structures.append(Polygon([(530, 240), (525, 240), (485, 280), (490, 280)]))
+
+
         elif scene == 17:
             print("SCENE: ", scene)
         elif scene == 18:
@@ -1157,7 +1183,7 @@ async def main ():
 
         
         if coin_yes == None:
-            screen.blit(BG, (0,0))
+            screen.fill(PURPLE) # screen.blit(BG, (0,0))
             current_time = pygame.time.get_ticks()
 
             
@@ -1169,7 +1195,7 @@ async def main ():
             barriers, platforms, structures, coin, hearts = get_scene(scene, coin_collected, heart_collected, is_visible)
             walls()
 
-            if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 18:
+            if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 16:
                 floor = ground()
                 pygame.draw.rect(screen, BLACK, floor)
 
@@ -1191,9 +1217,13 @@ async def main ():
                 idx = 7
                 tut_screen = True
 
-            if (scene == 4 or scene == 8 or scene == 12 or scene == 16) and respawn == True:
+            if (scene == 4 or scene == 8 or scene == 12) and respawn == True:
                 x = 20
                 y = 100
+                respawn = False
+            elif scene == 16 and respawn == True:
+                x = 20
+                y = GROUND - 110
                 respawn = False
 
             player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y)
@@ -1317,7 +1347,7 @@ async def main ():
                     if y > platform.y - 110: 
                         y = platform.y - 110
                     break
-                if scene == 3 or scene == 7 or scene == 11 or scene == 15:
+                if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 16:
                     if character.colliderect(ground()):
                         if y > GROUND - 110:
                             y = GROUND - 100
