@@ -1,0 +1,9 @@
+Please Remain on the Line
+Created by: Koi
+Design & Code: Koi
+Art: Madison 
+Music / SFX: Koi
+Built with: Python 3.12 - Pygame (pygame.org)
+Font: "Nokia Cellphone FC" by Zeh Fernando
+Made for: Mines Game Development Club 2026 Fall Game Jam
+Theme: "End of the Line" 
