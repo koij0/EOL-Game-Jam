@@ -397,7 +397,7 @@ async def main ():
         
     
 # PHYSICS
-    def physics(x_velocity, y_velocity, x_loc, y_loc, grounded, jumped, scene, touch_rope):
+    def physics(x_velocity, y_velocity, x_loc, y_loc, grounded, jumped, scene, touch_rope, throw_rope):
         
         # Gravity
         attached = touch_rope and keys[pygame.K_SPACE]
@@ -440,7 +440,8 @@ async def main ():
             y_loc = 0 
             if scene < 18:
                 scene += 1
-        return grounded, x_loc, y_loc, scene, x_velocity, y_velocity, jumped
+                throw_rope = False
+        return grounded, x_loc, y_loc, scene, x_velocity, y_velocity, jumped, throw_rope
 
 
 # ROPE
@@ -1248,7 +1249,7 @@ async def main ():
         # MOVE      
             character, animate_time, frame = player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y)  
             grounded, x, y, swing, jumped, time, throw_rope, no_move, walking_l, walking_r = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r)
-            grounded, x, y, scene, x_velocity, y_velocity, jumped = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope)
+            grounded, x, y, scene, x_velocity, y_velocity, jumped, throw_rope = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope, throw_rope)
 
             
 
