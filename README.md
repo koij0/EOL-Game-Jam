@@ -14,3 +14,7 @@ This is my first game jam! (Woohoo!)
 
 October 2, 2026 - October 30th, 2026
 
+## Credits:
+
+Fonts used: "Nokia Cellphone FC" (nokiafc22) by Zeh Fernando (DaFont). Licensed as free to distribute.
+
