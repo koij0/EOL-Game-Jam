@@ -52,13 +52,16 @@ async def main ():
     BLACK = (0, 0, 0) # Black
     WHITE = (255, 255, 255) # White
     TEAL = (0, 143, 145) # Teal
+    GOLD = (229, 185, 11)
 
 
 
 # INITIALIZATION
 
-    x = 20 # x = 300
-    y = 100 # y = 350
+    start = False
+
+    x = 20 
+    y = 100 
     y_velocity = 0
     x_velocity = 0
 
@@ -158,6 +161,10 @@ async def main ():
 
 
 # UPLOADS
+
+    # Start Screen
+    START_SCREEN = pygame.image.load("start_screen.png").convert_alpha()
+    START_SCREEN = pygame.transform.scale(START_SCREEN, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
     # Background
 
@@ -1167,25 +1174,29 @@ async def main ():
                         s, flash_timer, call = dial(buttons, sequence, mouse_pos, s, flash_timer)
 
                     elif event.button == 1:
-                        if reset_button.collidepoint(mouse_pos):
-                            scene, x, y = reset(scene)
+                        if start == False:
+                            if start_button.collidepoint(mouse_pos):
+                                start = True
+                        else:
+                            if reset_button.collidepoint(mouse_pos):
+                                scene, x, y = reset(scene)
 
-                        else: 
-                            SFX_THROW.play()
-                            x_rope, y_rope = mouse_pos
-                            rope_points = []
-                            for i in range(SEGMENTS):
-                                rope_points.append([x_rope, y_rope + i * SEGMENT_LENGTH, x_rope, y_rope + i * SEGMENT_LENGTH])
-                            rope_points[1][0] += random.uniform(-5, 5)
+                            else: 
+                                SFX_THROW.play()
+                                x_rope, y_rope = mouse_pos
+                                rope_points = []
+                                for i in range(SEGMENTS):
+                                    rope_points.append([x_rope, y_rope + i * SEGMENT_LENGTH, x_rope, y_rope + i * SEGMENT_LENGTH])
+                                rope_points[1][0] += random.uniform(-5, 5)
 
 
-                            # Reset swing physics
-                            angle = 0
-                            angle_velocity = 0
-                            swing = False
+                                # Reset swing physics
+                                angle = 0
+                                angle_velocity = 0
+                                swing = False
 
-                            throw_rope = True
-                            time = 5
+                                throw_rope = True
+                                time = 5
 
             if event.type == pygame.KEYDOWN:
                 if coin_yes == None:
@@ -1206,292 +1217,298 @@ async def main ():
                             idx += 1
                         tut_screen = False
 
-        
-        if coin_yes == None:
-            screen.fill(PURPLE) # screen.blit(BG, (0,0))
-            current_time = pygame.time.get_ticks()
+        if start == False:
+            screen.blit(START_SCREEN, (0,0))
+            start_button = pygame.Rect(150, 625, 300, 100)
+            pygame.draw.rect(screen, (0, 117, 180), start_button)
+            draw_text("START", 255, 660, color=WHITE)
 
-
-            # Reset Button
-            reset_button = RESET.get_rect(topleft = (15, 15))
-            screen.blit(RESET, reset_button)
-
-
-            
-            if current_time >= blink:
-                is_visible = not is_visible
-                blink = current_time + 4000
-            barriers, platforms, structures, coin, hearts = get_scene(scene, coin_collected, heart_collected, is_visible)
-            walls()
-
-            if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 16:
-                floor = ground()
-                pygame.draw.rect(screen, BLACK, floor)
-
-                # Rope hits ground/platforms/etc
-                for i in range(len(rope_points)):
-                    if floor.collidepoint(rope_points[i][0], rope_points[i][1]):
-                        if platform.left <= rope_points[i][0] <= platform.right:
-                            if rope_points[i][1] >= platform.top:
-                                rope_points[i][1] = floor.top      
-                                                
-                
-
-            # TUT
-            if scene <= 4:
-                if tut_screen == True:
-                    tutorial(tut_text, idx, tut_track)
-
-            if scene == 3 and grounded == True and tut_track[7] == False:
-                idx = 7
-                tut_screen = True
-
-            if scene == 4 and tut_track[8] == False:
-                            idx = 8
-                            tut_screen = True
-
-
-
-            # RESPAWNS
-
-            if (scene == 4 or scene == 8 or scene == 12) and respawn == True:
-                x = 20
-                y = 100
-                respawn = False
-            elif scene == 16 and respawn == True:
-                x = 20
-                y = GROUND - 110
-                respawn = False
-
-            player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y)
-            
-            
-
-        
-            keys = pygame.key.get_pressed()
-    
-
-        # ROPE
-            if throw_rope == True:
-                if scene == 1 and tut_track[2] == False:
-                        idx = 2
-                        tut_screen = True
-                elif scene == 1 and tut_track[3] == False:
-                    tut_screen = True
-                elif scene == 1 and tut_track[4] == False:
-                    tut_screen = True
-                angle, angle_velocity, x_velocity, y_velocity = rope(rope_points, angle, angle_velocity, swing, x_velocity, y_velocity, keys)
-        
-        # MOVE      
-            character, animate_time, frame = player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y)  
-            grounded, x, y, swing, jumped, time, throw_rope, no_move, walking_l, walking_r = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r)
-            grounded, x, y, scene, x_velocity, y_velocity, jumped, throw_rope = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope, throw_rope)
-
-            
-
-     # COLLISIONS
-
-            # coins
-            if len(coin) > 0: ## FIX 
-                if character.colliderect(coin[0]):
-                    coin_count = get_coin(coin_count)
-                    coin_collected = True
-                    coin.remove(coin[0])
-
-            # hearts
-            if len(hearts) > 0: ## FIX 
-                if character.colliderect(hearts[0]):
-                    lives = get_heart(lives)
-                    heart_collected = True
-                    hearts.remove(hearts[0])
-
-                          
-
-            if scene == 3 or scene == 7 or scene == 11 or scene == 15:
-                draw_phonebooth()
-                if coin_count > 0:        
-                    if character.colliderect(draw_phonebooth()):
-                        pygame.draw.rect(screen, BLACK, (200, 400, 200, 100))  
-                        draw_text("Use Coin?", 235, 410) 
-                        draw_text("Yes", 225, 460) 
-                        draw_text("No", 334, 460) 
-
-            # Rope collision
-            rope_collision = False
-            if throw_rope == True:
-                for i in range(len(rope_points) - 1):
-                    start_point = (rope_points[i][0], rope_points[i][1])
-                    end_point = (rope_points[i+1][0], rope_points[i+1][1])
-
-                    if character.clipline(start_point, end_point):
-                        rope_collision = True
-                        break
-
-            if rope_collision == True:
-                touch_x = x
-                touch_y = y
-                if touch_rope == False and not keys[pygame.K_SPACE]:
-                    time = 5
-                    touch_rope = True
-            else:
-                touch_x = None
-                touch_y = None
-                swing = False
-                touch_rope = False
-
-
-        # Barriers  
-            hit_barrier = False
-            for barrier in barriers:
-                if character.colliderect(barrier[1]):
-                    hit_barrier = True
-                    break
-
-        # Lives
-            if hit_barrier == True:
-                if scene <= 3 and tut_track[6] == False:
-                    idx = 6
-                    tut_screen = True
-                if life == False: 
-                    lives = lose_life(lives)
-                    life = True
-            else:
-                life = False
-
-        # Check Lives
-            if lives <= 0:
-                print("END GAME")
-
-
-        # Platforms
-
-            #tut
-            if scene == 1 and tut_track[1] == False:
-                if character.colliderect(platforms[3]):
-                    idx = 1
-                    tut_screen = True
-
-            if scene == 2 and tut_track[5] == False:
-                if character.colliderect(platforms[0]) or character.colliderect(platforms[1]):
-                    idx = 5
-                    tut_screen = True
-
-            if scene == 2 and tut_track[6] == False:
-                if character.colliderect(platforms[3]):
-                    idx = 6
-                    tut_screen = True
-
-            
-
-            for platform in platforms:
-                if character.colliderect(platform):
-                    grounded = True
-                    if y > platform.y - 110: 
-                        y = platform.y - 110
-                    break
-                if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 16:
-                    if character.colliderect(ground()):
-                        if y > GROUND - 110:
-                            y = GROUND - 100
-                            grounded = True
-                    else: 
-                        grounded = False
-
-                else:
-                    grounded = False
-            
-
-        # Structures
-            for structure in structures:
-
-                if not isinstance(structure, Polygon):    
-                    if character.colliderect(structure):
-
-                        overlap_left = character.right - structure.left
-                        overlap_right = structure.right - character.left
-
-                        if overlap_left < overlap_right:
-                            character.right = structure.left
-                        else:
-                            character.left = structure.right
-
-                        x = character.left
-                    
-                        break
-
-           
-
-            # Coin Count Display
-            count(coin_count)
-
-            # Hearts
-            heart(lives)
-
-        elif coin_yes == True:
-
-            # Phone call
-            if phone_screen == None:
-                coin_count = use_coin(coin_count)
-                phone_screen = True
-
-            if phone_screen == True:
-                phone_buttons(buttons)
+        else: 
+            if coin_yes == None:
+                screen.fill(PURPLE) # screen.blit(BG, (0,0))
                 current_time = pygame.time.get_ticks()
 
-                if seq_played == False and flash_timer == None:
-                    flash_timer = phone_sequence(sequence, current_time)
-                    seq_played = True
+
+                # Reset Button
+                reset_button = RESET.get_rect(topleft = (15, 15))
+                screen.blit(RESET, reset_button)
+
+
+                
+                if current_time >= blink:
+                    is_visible = not is_visible
+                    blink = current_time + 4000
+                barriers, platforms, structures, coin, hearts = get_scene(scene, coin_collected, heart_collected, is_visible)
+                walls()
+
+                if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 16:
+                    floor = ground()
+                    pygame.draw.rect(screen, BLACK, floor)
+
+                    # Rope hits ground/platforms/etc
+                    for i in range(len(rope_points)):
+                        if floor.collidepoint(rope_points[i][0], rope_points[i][1]):
+                            if platform.left <= rope_points[i][0] <= platform.right:
+                                if rope_points[i][1] >= platform.top:
+                                    rope_points[i][1] = floor.top      
+                                                    
                     
 
-                if flash_timer: 
-                    flash_timer = flash(flash_timer, current_time, buttons)
+                # TUT
+                if scene <= 4:
+                    if tut_screen == True:
+                        tutorial(tut_text, idx, tut_track)
 
-                    if flash_timer and flash_timer.get('wrong', False):
-                        if current_time - flash_timer['start_time'] >= flash_timer['duration']:
-                            flash_timer = None
-                            s = 0
-                            call = None
-                            seq_played = False
-                    
+                if scene == 3 and grounded == True and tut_track[7] == False:
+                    idx = 7
+                    tut_screen = True
+
+                if scene == 4 and tut_track[8] == False:
+                                idx = 8
+                                tut_screen = True
+
+
+
+                # RESPAWNS
+
+                if (scene == 4 or scene == 8 or scene == 12) and respawn == True:
+                    x = 20
+                    y = 100
+                    respawn = False
+                elif scene == 16 and respawn == True:
+                    x = 20
+                    y = GROUND - 110
+                    respawn = False
+
+                player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y)
+                
+                
+
             
-            if seq_played == True:
-                if call == True:
-                    if phone_ringing == False:
-                        RINGTONE.play(-1)  
-                        phone_ringing = True
-                    order, phone_answer, lives = phone_call(order, phone_script, phone_answer, lives) 
-                    if phone_answer != None:
+                keys = pygame.key.get_pressed()
+        
+
+            # ROPE
+                if throw_rope == True:
+                    if scene == 1 and tut_track[2] == False:
+                            idx = 2
+                            tut_screen = True
+                    elif scene == 1 and tut_track[3] == False:
+                        tut_screen = True
+                    elif scene == 1 and tut_track[4] == False:
+                        tut_screen = True
+                    angle, angle_velocity, x_velocity, y_velocity = rope(rope_points, angle, angle_velocity, swing, x_velocity, y_velocity, keys)
+            
+            # MOVE      
+                character, animate_time, frame = player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y)  
+                grounded, x, y, swing, jumped, time, throw_rope, no_move, walking_l, walking_r = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r)
+                grounded, x, y, scene, x_velocity, y_velocity, jumped, throw_rope = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope, throw_rope)
+
+                
+
+        # COLLISIONS
+
+                # coins
+                if len(coin) > 0: ## FIX 
+                    if character.colliderect(coin[0]):
+                        coin_count = get_coin(coin_count)
+                        coin_collected = True
+                        coin.remove(coin[0])
+
+                # hearts
+                if len(hearts) > 0: ## FIX 
+                    if character.colliderect(hearts[0]):
+                        lives = get_heart(lives)
+                        heart_collected = True
+                        hearts.remove(hearts[0])
+
+                            
+
+                if scene == 3 or scene == 7 or scene == 11 or scene == 15:
+                    draw_phonebooth()
+                    if coin_count > 0:        
+                        if character.colliderect(draw_phonebooth()):
+                            pygame.draw.rect(screen, BLACK, (200, 400, 200, 100))  
+                            draw_text("Use Coin?", 235, 410) 
+                            draw_text("Yes", 225, 460) 
+                            draw_text("No", 334, 460) 
+
+                # Rope collision
+                rope_collision = False
+                if throw_rope == True:
+                    for i in range(len(rope_points) - 1):
+                        start_point = (rope_points[i][0], rope_points[i][1])
+                        end_point = (rope_points[i+1][0], rope_points[i+1][1])
+
+                        if character.clipline(start_point, end_point):
+                            rope_collision = True
+                            break
+
+                if rope_collision == True:
+                    touch_x = x
+                    touch_y = y
+                    if touch_rope == False and not keys[pygame.K_SPACE]:
+                        time = 5
+                        touch_rope = True
+                else:
+                    touch_x = None
+                    touch_y = None
+                    swing = False
+                    touch_rope = False
+
+
+            # Barriers  
+                hit_barrier = False
+                for barrier in barriers:
+                    if character.colliderect(barrier[1]):
+                        hit_barrier = True
+                        break
+
+            # Lives
+                if hit_barrier == True:
+                    if scene <= 3 and tut_track[6] == False:
+                        idx = 6
+                        tut_screen = True
+                    if life == False: 
+                        lives = lose_life(lives)
+                        life = True
+                else:
+                    life = False
+
+            # Check Lives
+                if lives <= 0:
+                    print("END GAME")
+
+
+            # Platforms
+
+                #tut
+                if scene == 1 and tut_track[1] == False:
+                    if character.colliderect(platforms[3]):
+                        idx = 1
+                        tut_screen = True
+
+                if scene == 2 and tut_track[5] == False:
+                    if character.colliderect(platforms[0]) or character.colliderect(platforms[1]):
+                        idx = 5
+                        tut_screen = True
+
+                if scene == 2 and tut_track[6] == False:
+                    if character.colliderect(platforms[3]):
+                        idx = 6
+                        tut_screen = True
+
+                
+
+                for platform in platforms:
+                    if character.colliderect(platform):
+                        grounded = True
+                        if y > platform.y - 110: 
+                            y = platform.y - 110
+                        break
+                    if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 16:
+                        if character.colliderect(ground()):
+                            if y > GROUND - 110:
+                                y = GROUND - 100
+                                grounded = True
+                        else: 
+                            grounded = False
+
+                    else:
+                        grounded = False
+                
+
+            # Structures
+                for structure in structures:
+
+                    if not isinstance(structure, Polygon):    
+                        if character.colliderect(structure):
+
+                            overlap_left = character.right - structure.left
+                            overlap_right = structure.right - character.left
+
+                            if overlap_left < overlap_right:
+                                character.right = structure.left
+                            else:
+                                character.left = structure.right
+
+                            x = character.left
+                        
+                            break
+
+            
+
+                # Coin Count Display
+                count(coin_count)
+
+                # Hearts
+                heart(lives)
+
+            elif coin_yes == True:
+
+                # Phone call
+                if phone_screen == None:
+                    coin_count = use_coin(coin_count)
+                    phone_screen = True
+
+                if phone_screen == True:
+                    phone_buttons(buttons)
+                    current_time = pygame.time.get_ticks()
+
+                    if seq_played == False and flash_timer == None:
+                        flash_timer = phone_sequence(sequence, current_time)
+                        seq_played = True
+                        
+
+                    if flash_timer: 
+                        flash_timer = flash(flash_timer, current_time, buttons)
+
+                        if flash_timer and flash_timer.get('wrong', False):
+                            if current_time - flash_timer['start_time'] >= flash_timer['duration']:
+                                flash_timer = None
+                                s = 0
+                                call = None
+                                seq_played = False
+                        
+                
+                if seq_played == True:
+                    if call == True:
+                        if phone_ringing == False:
+                            RINGTONE.play(-1)  
+                            phone_ringing = True
+                        order, phone_answer, lives = phone_call(order, phone_script, phone_answer, lives) 
+                        if phone_answer != None:
+                            RINGTONE.stop()
+                            phone_ringing = False
+                            call = None
+                            s = 0
+                            scene += 1
+                            seq_played = False
+                            coin_yes = False
+                            phone_answer = None
+                            phone_screen = None
+                    elif call == False:
                         RINGTONE.stop()
                         phone_ringing = False
                         call = None
                         s = 0
-                        scene += 1
                         seq_played = False
-                        coin_yes = False
-                        phone_answer = None
-                        phone_screen = None
-                elif call == False:
-                    RINGTONE.stop()
-                    phone_ringing = False
-                    call = None
-                    s = 0
-                    seq_played = False
 
-            # Reset for next level
-            respawn = True
-            coin_collected = False
-            heart_collected = False
+                # Reset for next level
+                respawn = True
+                coin_collected = False
+                heart_collected = False
 
 
 
-        elif coin_yes == False:
-            x = 390
-            coin_yes = None
+            elif coin_yes == False:
+                x = 390
+                coin_yes = None
 
-        
+            
         pygame.display.flip()
-        
-                    
+            
+                        
         await asyncio.sleep(0)
 
 
