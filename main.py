@@ -636,6 +636,8 @@ async def main ():
     # Phone Screen
     def phone_buttons(buttons):
         screen.fill((19, 13, 26))
+        draw_text("Please Dial:", 220, 50)
+
         for i in range(len(buttons)):
             screen.blit(BLUE_BUTTONS[i], buttons[i])
 
@@ -1089,6 +1091,7 @@ async def main ():
 
     def phone_call(order, phone_script, phone_answer, lives):
         screen.fill((0, 0, 0))
+
     # Intro 
         if order == 0: 
             draw_text(phone_script[0], 100, 200)
