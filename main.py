@@ -1180,6 +1180,9 @@ async def main ():
                         else:
                             if reset_button.collidepoint(mouse_pos):
                                 scene, x, y = reset(scene)
+                                for i in range(len(tut_text)):
+                                    tut_track[i] = False
+                                
 
                             else: 
                                 SFX_THROW.play()
@@ -1383,6 +1386,10 @@ async def main ():
             # Platforms
 
                 #tut
+                if scene == 1 and tut_track[0] == False:
+                    if character.colliderect(platforms[0]):
+                        idx = 0
+                        tut_screen = True
                 if scene == 1 and tut_track[1] == False:
                     if character.colliderect(platforms[3]):
                         idx = 1
