@@ -221,6 +221,12 @@ async def main ():
         GREEN_BUTTON = pygame.transform.scale(GREEN_BUTTON, (100, 100))
         GREEN_BUTTONS.append(GREEN_BUTTON)
 
+
+    # RESET BUTTON
+    RESET = pygame.image.load("sprites/reset.png").convert_alpha()
+    RESET = pygame.transform.scale(RESET, (50, 50))
+
+
     # Audio
 
     RINGTONE = pygame.mixer.Sound("sfx/ringtone.wav")
@@ -283,6 +289,24 @@ async def main ():
         draw_text("RETURN", 250, 430) 
         tut_track[idx] = True
 
+
+# RESET
+    def reset(scene):
+        # respawn
+        x = 20
+        y = 100
+
+        if scene <= 3:
+            scene = 1
+        elif scene <= 7:
+            scene = 4
+        elif scene <= 11:
+            scene = 8
+        elif scene <= 15:
+            scene = 12
+
+        return scene, x, y
+             
 
 # PLAYER
     def player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y):
@@ -565,7 +589,7 @@ async def main ():
 
     # Display Count
     def count(count):
-        draw_text(f"Coins: {count}", 25, 25)
+        draw_text(f"Coins: {count}", 75, 25)
 
 # LIVES
     # Count
@@ -729,7 +753,6 @@ async def main ():
             platforms.append(pygame.Rect(10, 790, 100, 15))
 
             platforms.append(pygame.Rect(260, 790, 150, 15))
-            # barriers.append([pygame.transform.scale(WIRE2, (400, 60)), (pygame.transform.scale(WIRE2, (400, 60))).get_rect(topleft = (290, 750))]) 
        
 
         elif scene == 2:
@@ -934,10 +957,8 @@ async def main ():
                 off_barriers.append([pygame.transform.scale(WIRE1, (190, 10)), (pygame.transform.scale(WIRE1, (190, 10))).get_rect(topleft = (10, 785))]) 
                 off_barriers.append([pygame.transform.scale(WIRE1, (190, 10)), (pygame.transform.scale(WIRE1, (190, 10))).get_rect(topleft = (400, 785))]) 
 
-                
 
-
-        elif scene == 13: ### EDIT -- the top (3 platforms)
+        elif scene == 13: 
             platforms.append(pygame.Rect(10, 200, 130, 15))
             platforms.append(pygame.Rect(255, 350, 100, 15))
             platforms.append(pygame.Rect(460, 200, 130, 15))
@@ -965,8 +986,6 @@ async def main ():
             barriers.append([pygame.transform.scale(WIRE2, (150, 60)), (pygame.transform.scale(WIRE2, (150, 60))).get_rect(topleft = (10, 750))]) 
             barriers.append([pygame.transform.scale(WIRE2, (150, 60)), (pygame.transform.scale(WIRE2, (150, 60))).get_rect(topleft = (440, 750))]) 
 
-            
-            
 
         elif scene == 14:
             platforms.append(pygame.Rect(175, 200, 250, 15))
@@ -1000,8 +1019,6 @@ async def main ():
 
 
 
-
-
         # 4 - Final
 
         elif scene == 16:
@@ -1012,6 +1029,9 @@ async def main ():
             platforms.append(pygame.Rect(320, 500, 100, 20)) 
             structures.append(Polygon([(320, 500), (420, 500), (420, 650), (320, 650)]))
             structures.append(pygame.Rect(410, 515, 10, 135))
+
+            barriers.append([pygame.transform.scale(WIRE2, (600, 30)), (pygame.transform.scale(WIRE2, (600, 30))).get_rect(topleft = (0, 200))]) 
+            barriers.append([pygame.transform.scale(WIRE2, (600, 30)), (pygame.transform.scale(WIRE2, (600, 30))).get_rect(topleft = (0, 275))]) 
 
             # telephone pole
             structures.append(Polygon([(460, 200), (490, 200), (490, 650), (460, 650)]))
@@ -1147,21 +1167,25 @@ async def main ():
                         s, flash_timer, call = dial(buttons, sequence, mouse_pos, s, flash_timer)
 
                     elif event.button == 1:
-                        SFX_THROW.play()
-                        x_rope, y_rope = mouse_pos
-                        rope_points = []
-                        for i in range(SEGMENTS):
-                            rope_points.append([x_rope, y_rope + i * SEGMENT_LENGTH, x_rope, y_rope + i * SEGMENT_LENGTH])
-                        rope_points[1][0] += random.uniform(-5, 5)
+                        if reset_button.collidepoint(mouse_pos):
+                            scene, x, y = reset(scene)
+
+                        else: 
+                            SFX_THROW.play()
+                            x_rope, y_rope = mouse_pos
+                            rope_points = []
+                            for i in range(SEGMENTS):
+                                rope_points.append([x_rope, y_rope + i * SEGMENT_LENGTH, x_rope, y_rope + i * SEGMENT_LENGTH])
+                            rope_points[1][0] += random.uniform(-5, 5)
 
 
-                        # Reset swing physics
-                        angle = 0
-                        angle_velocity = 0
-                        swing = False
+                            # Reset swing physics
+                            angle = 0
+                            angle_velocity = 0
+                            swing = False
 
-                        throw_rope = True
-                        time = 5
+                            throw_rope = True
+                            time = 5
 
             if event.type == pygame.KEYDOWN:
                 if coin_yes == None:
@@ -1187,7 +1211,11 @@ async def main ():
             screen.fill(PURPLE) # screen.blit(BG, (0,0))
             current_time = pygame.time.get_ticks()
 
-            
+
+            # Reset Button
+            reset_button = RESET.get_rect(topleft = (15, 15))
+            screen.blit(RESET, reset_button)
+
 
             
             if current_time >= blink:
@@ -1210,13 +1238,21 @@ async def main ():
                 
 
             # TUT
-            if scene <= 3:
+            if scene <= 4:
                 if tut_screen == True:
                     tutorial(tut_text, idx, tut_track)
 
             if scene == 3 and grounded == True and tut_track[7] == False:
                 idx = 7
                 tut_screen = True
+
+            if scene == 4 and tut_track[8] == False:
+                            idx = 8
+                            tut_screen = True
+
+
+
+            # RESPAWNS
 
             if (scene == 4 or scene == 8 or scene == 12) and respawn == True:
                 x = 20
@@ -1338,6 +1374,11 @@ async def main ():
             if scene == 2 and tut_track[5] == False:
                 if character.colliderect(platforms[0]) or character.colliderect(platforms[1]):
                     idx = 5
+                    tut_screen = True
+
+            if scene == 2 and tut_track[6] == False:
+                if character.colliderect(platforms[3]):
+                    idx = 6
                     tut_screen = True
 
             

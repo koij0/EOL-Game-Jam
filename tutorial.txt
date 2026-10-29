@@ -4,5 +4,6 @@ To hold onto ROPE hold the SPACE
 Use ARROW KEYS to CLIMB and SWING
 Be careful, the ROPE has a TIME LIMIT!
 Collect COINS!
-If you hit a BARRIER, you lose a LIFE!
+Hold ROPE and use the MOUSE to move the ROPE to CLIMB!
 There's a PHONE...
+Be careful of WIRES...you will lose a LIFE!
