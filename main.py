@@ -127,7 +127,6 @@ async def main ():
     phone_ringing = False
 
     
-    
 
 # FILES
     # Phone Story
@@ -167,9 +166,14 @@ async def main ():
     START_SCREEN = pygame.transform.scale(START_SCREEN, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
     # Background
+    BH1 = pygame.image.load("backgrounds/house1.png").convert_alpha()
+    BH1 = pygame.transform.scale(BH1, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-    BG = pygame.image.load("background.png").convert_alpha()
-    BG = pygame.transform.scale(BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
+    BH2 = pygame.image.load("backgrounds/house2.png").convert_alpha()
+    BH2 = pygame.transform.scale(BH2, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    BG2 = pygame.image.load("backgrounds/background2.png").convert_alpha()
+    BG2 = pygame.transform.scale(BG2, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
     # Player
     PLAYER_IDLE = pygame.image.load("sprites/idle.png").convert_alpha()
@@ -278,7 +282,7 @@ async def main ():
 
 # TEXT
 
-    def draw_text(text, x, y, color=TEAL):
+    def draw_text(text, x, y, color=WHITE):
         img = font.render(text, True, color)
         screen.blit(img, (x, y))
 
@@ -292,7 +296,7 @@ async def main ():
 # TUTORIAL
     def tutorial(tut_text, idx, tut_track):
         pygame.draw.rect(screen, BLACK, (150, 300, 300, 170))  
-        wrap(screen, tut_text[idx], font, TEAL, 160, 320, 75)
+        wrap(screen, tut_text[idx], font, WHITE, 160, 320, 75)
         draw_text("RETURN", 250, 430) 
         tut_track[idx] = True
 
@@ -788,12 +792,12 @@ async def main ():
 
            
         elif scene == 3:
-            structures.append(pygame.Rect(210, 0, 40, 300))
-            structures.append(Polygon([(210, 260), (210, 360), (360, 360)]))
+            structures.append(pygame.Rect(210, 0, 40, 435))
+            structures.append(Polygon([(210, 335), (210, 435), (360, 435)]))
 
-            platforms.append(pygame.Rect(0, 500, 250, 150)) 
-            platforms.append(pygame.Rect(250, 550, 100, 100)) 
-            platforms.append(pygame.Rect(350, 600, 100, 50)) 
+           # platforms.append(pygame.Rect(0, 500, 250, 150)) 
+           # platforms.append(pygame.Rect(250, 550, 100, 100)) 
+           # platforms.append(pygame.Rect(350, 600, 100, 50)) 
 
 
             barriers.append([pygame.transform.scale(WIRE2, (360, 60)), (pygame.transform.scale(WIRE2, (360, 60))).get_rect(topleft = (240, 235))]) 
@@ -1039,9 +1043,7 @@ async def main ():
             structures.append(Polygon([(320, 500), (420, 500), (420, 650), (320, 650)]))
             structures.append(pygame.Rect(410, 515, 10, 135))
 
-            barriers.append([pygame.transform.scale(WIRE2, (600, 30)), (pygame.transform.scale(WIRE2, (600, 30))).get_rect(topleft = (0, 200))]) 
-            barriers.append([pygame.transform.scale(WIRE2, (600, 30)), (pygame.transform.scale(WIRE2, (600, 30))).get_rect(topleft = (0, 275))]) 
-
+           
             # telephone pole
             structures.append(Polygon([(460, 200), (490, 200), (490, 650), (460, 650)]))
 
@@ -1059,6 +1061,11 @@ async def main ():
 
             structures.append(Polygon([(420, 240), (425, 240), (465, 280), (460, 280)]))
             structures.append(Polygon([(530, 240), (525, 240), (485, 280), (490, 280)]))
+
+            barriers.append([pygame.transform.scale(WIRE2, (600, 30)), (pygame.transform.scale(WIRE2, (600, 30))).get_rect(topleft = (0, 210))]) 
+            barriers.append([pygame.transform.scale(WIRE2, (600, 30)), (pygame.transform.scale(WIRE2, (600, 30))).get_rect(topleft = (0, 285))]) 
+
+            
 
 
         elif scene == 17:
@@ -1172,7 +1179,7 @@ async def main ():
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos  
-                if phone_ringing == False:
+                if phone_ringing == False and scene != 16:
                     if seq_played == True:   
                         s, flash_timer, call = dial(buttons, sequence, mouse_pos, s, flash_timer)
 
@@ -1185,7 +1192,12 @@ async def main ():
                                 scene, x, y = reset(scene)
                                 for i in range(len(tut_text)):
                                     tut_track[i] = False
-                                
+                                if coin_collected == True:
+                                    coin_count -= 1        
+                                    coin_collected = False
+                                if heart_collected == True:
+                                    lives = lose_life(lives) 
+                                    heart_collected = False
 
                             else: 
                                 SFX_THROW.play()
@@ -1231,7 +1243,14 @@ async def main ():
 
         else: 
             if coin_yes == None:
-                screen.fill(PURPLE) # screen.blit(BG, (0,0))
+                if scene == 1:
+                    screen.blit(BH1, (0,0))
+                elif scene == 2:
+                    screen.blit(BH2, (0,0))
+                elif scene == 3:
+                    screen.blit(BG2, (0,0))
+                else:
+                    screen.fill(PURPLE) # screen.blit(BG, (0,0))
                 current_time = pygame.time.get_ticks()
 
 
@@ -1383,7 +1402,7 @@ async def main ():
 
             # Check Lives
                 if lives <= 0:
-                    print("END GAME")
+                    start = False
 
 
             # Platforms
