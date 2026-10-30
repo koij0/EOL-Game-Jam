@@ -87,7 +87,7 @@ async def main ():
     life = False
     respawn = False
 
-    scene = 1
+    scene = 1 # Switch Back to 0
     time = 5
 
     x_rope = 0
@@ -785,7 +785,16 @@ async def main ():
         hearts = []
     # 0 - Phone Call / Home 
 
-        if scene == 1:
+        if scene == 0: # Ignore for now
+            screen.fill(BLACK)
+            # MAKE TYPE-Y
+            call_scene = ["Hello?", "How can I help you?", "Hello?", "Are you there?", "Hello...?", ] 
+            for i in range(len(call_scene)):
+                draw_text(call_scene[i], 20, 20 + (i * 80))
+               # pygame.display.flip()
+            
+
+        elif scene == 1:
             structures.append(Polygon([(600, 0), (220, 0), (600, 220)]))
             platforms.append(pygame.Rect(10, 200, 300, 15)) # bed room loft
             platforms.append(pygame.Rect(310, 250, 75, 15)) # stairs
@@ -1244,7 +1253,7 @@ async def main ():
                         if start == False:
                             if start_button.collidepoint(mouse_pos):
                                 start = True
-                        else:
+                        elif scene != 0:
                             if reset_button.collidepoint(mouse_pos):
                                 scene, x, y = reset(scene)
                                 for i in range(len(tut_text)):
@@ -1298,7 +1307,8 @@ async def main ():
             start_button = pygame.Rect(150, 625, 300, 100)
             pygame.draw.rect(screen, (0, 117, 180), start_button)
             draw_text("START", 255, 660, color=WHITE)
-
+        elif scene == 0: 
+            get_scene(scene, None, None, None)
         else: 
             if coin_yes == None:
                 if scene == 1:
@@ -1469,6 +1479,15 @@ async def main ():
             # Check Lives
                 if lives <= 0:
                     start = False
+                    # Resets
+                    lives = 9
+                    coin = 1
+                    scene = 1
+                    x = 20
+                    y = 100
+                    coin_collected = False
+                    heart_collected = False
+                    throw_rope = False
 
 
             # Platforms
