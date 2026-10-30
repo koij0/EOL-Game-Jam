@@ -126,6 +126,13 @@ async def main ():
 
     phone_ringing = False
 
+    snow = []
+    for i in range(100):
+        x_snow = random.randint(0, SCREEN_WIDTH)
+        y_snow = random.randint(-SCREEN_HEIGHT, 0)
+        snow_speed = random.uniform(1, 3)
+        snow.append([x_snow, y_snow, snow_speed])
+
     
 
 # FILES
@@ -174,6 +181,17 @@ async def main ():
 
     BG2 = pygame.image.load("backgrounds/background2.png").convert_alpha()
     BG2 = pygame.transform.scale(BG2, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    BG3 = pygame.image.load("backgrounds/background3.png").convert_alpha()
+    BG3 = pygame.transform.scale(BG3, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    BG4 = pygame.image.load("backgrounds/background4.png").convert_alpha()
+    BG4 = pygame.transform.scale(BG4, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    BG5 = pygame.image.load("backgrounds/background5.png").convert_alpha()
+    BG5 = pygame.transform.scale(BG5, (SCREEN_WIDTH, SCREEN_HEIGHT))
+    
+    
 
     # Player
     PLAYER_IDLE = pygame.image.load("sprites/idle.png").convert_alpha()
@@ -575,7 +593,18 @@ async def main ():
 
         return angle, angle_velocity, x_velocity, y_velocity
 
-        
+
+# SNOW
+    def snowing(snow):
+
+        for flake in snow:
+            flake[1] += flake[2]
+
+            if flake[1] > SCREEN_HEIGHT:
+                flake[1] = random.randint(-50, -10)
+                flake[0] = random.randint(0, SCREEN_WIDTH)
+
+            pygame.draw.circle(screen, WHITE, (int(flake[0]), int(flake[1])), 2)
 
 # COINS
 
@@ -1065,7 +1094,35 @@ async def main ():
             barriers.append([pygame.transform.scale(WIRE2, (600, 30)), (pygame.transform.scale(WIRE2, (600, 30))).get_rect(topleft = (0, 210))]) 
             barriers.append([pygame.transform.scale(WIRE2, (600, 30)), (pygame.transform.scale(WIRE2, (600, 30))).get_rect(topleft = (0, 285))]) 
 
+            x_rope, y_rope = 475, 295
+            rope_points = []
+
+            for i in range(SEGMENTS):
+                rope_points.append([x_rope, y_rope + i * SEGMENT_LENGTH, x_rope, y_rope + i * SEGMENT_LENGTH])
+                if i > 0:
+                    rope_points[i][0] += random.uniform(-5, 5)
+
+            rope_points[0][0] = x_rope
+            rope_points[0][1] = y_rope   
+                 
+
+            for i in range(len(rope_points) - 1):
+                p1 = (int(rope_points[i][0]), int(rope_points[i][1]))
+                p2 = (int(rope_points[i + 1][0]),int(rope_points[i + 1][1]))
             
+            # Draw
+            
+                # Rope
+                pygame.draw.line(screen, (255, 223, 0), p1, p2, 4)
+            
+            for i, point in enumerate(rope_points):
+                pygame.draw.circle(screen, (229, 184, 11), (int(point[0]), int(point[1])), 4)
+            
+            # Ball
+            pygame.draw.circle(screen, (229, 185, 11), (int(rope_points[0][0]), int(rope_points[0][1])), 10)
+            
+                    
+                    
 
 
         elif scene == 17:
@@ -1235,6 +1292,7 @@ async def main ():
                             idx += 1
                         tut_screen = False
 
+
         if start == False:
             screen.blit(START_SCREEN, (0,0))
             start_button = pygame.Rect(150, 625, 300, 100)
@@ -1249,14 +1307,22 @@ async def main ():
                     screen.blit(BH2, (0,0))
                 elif scene == 3:
                     screen.blit(BG2, (0,0))
+                elif scene < 8:
+                    screen.blit(BG3, (0,0))
+                elif scene < 12:
+                    screen.blit(BG4, (0,0))
                 else:
-                    screen.fill(PURPLE) # screen.blit(BG, (0,0))
+                    screen.blit(BG5, (0,0))
                 current_time = pygame.time.get_ticks()
 
 
                 # Reset Button
                 reset_button = RESET.get_rect(topleft = (15, 15))
                 screen.blit(RESET, reset_button)
+
+                # Snow
+                if scene > 3:
+                    snowing(snow)
 
 
                 
