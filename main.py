@@ -1231,6 +1231,10 @@ async def main ():
         rope_points[0][2] = x_rope
         rope_points[0][3] = y_rope
 
+        # Hit box
+        hit_box = pygame.Rect(x + 20, y + 20, 80, 60)
+
+
                             
 
 # Check Events
@@ -1461,7 +1465,7 @@ async def main ():
             # Barriers  
                 hit_barrier = False
                 for barrier in barriers:
-                    if character.colliderect(barrier[1]):
+                    if hit_box.colliderect(barrier[1]):
                         hit_barrier = True
                         break
 
@@ -1488,6 +1492,8 @@ async def main ():
                     coin_collected = False
                     heart_collected = False
                     throw_rope = False
+                    for i in range(len(tut_text)):
+                        tut_track[i] = False
 
 
             # Platforms
