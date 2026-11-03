@@ -87,7 +87,7 @@ async def main ():
     life = False
     respawn = False
 
-    scene = 0 
+    scene = 15 # CHEATING
     time = 5
 
     x_rope = 0
@@ -138,6 +138,8 @@ async def main ():
     current_text = ""
     current_line = 0
     completed_lines = []
+
+    ending = None 
     
 
 # FILES
@@ -681,8 +683,8 @@ async def main ():
 # PHONE BOOTH 
 
     # Sprite Rendering
-    def draw_phonebooth():
-        phonebooth = PHONE.get_rect(topleft = (480, GROUND - 130))
+    def draw_phonebooth(phone_x, phone_y):
+        phonebooth = PHONE.get_rect(topleft = (phone_x, phone_y))
         screen.blit(PHONE, phonebooth)
         return phonebooth
 
@@ -1148,38 +1150,14 @@ async def main ():
             rope_points = []
 
             for i in range(SEGMENTS):
-                rope_points.append([x_rope, y_rope + i * SEGMENT_LENGTH, x_rope, y_rope + i * SEGMENT_LENGTH])
+                rope_points.append([x_rope, y_rope + i * SEGMENT_LENGTH, x_rope, y_rope + i * SEGMENT_LENGTH])      
                 if i > 0:
                     rope_points[i][0] += random.uniform(-5, 5)
 
             rope_points[0][0] = x_rope
             rope_points[0][1] = y_rope   
                  
-
-            for i in range(len(rope_points) - 1):
-                p1 = (int(rope_points[i][0]), int(rope_points[i][1]))
-                p2 = (int(rope_points[i + 1][0]),int(rope_points[i + 1][1]))
-            
-            # Draw
-            
-                # Rope
-                pygame.draw.line(screen, (255, 223, 0), p1, p2, 4)
-            
-            for i, point in enumerate(rope_points):
-                pygame.draw.circle(screen, (229, 184, 11), (int(point[0]), int(point[1])), 4)
-            
-            # Ball
-            pygame.draw.circle(screen, (229, 185, 11), (int(rope_points[0][0]), int(rope_points[0][1])), 10)
-            
-                    
-                    
-
-
-        elif scene == 17:
-            print("SCENE: ", scene)
-        elif scene == 18:
-            print("SCENE: ", scene)
-
+  
 
         for barrier in barriers:
             screen.blit(barrier[0], barrier[1])
@@ -1196,7 +1174,19 @@ async def main ():
                 pygame.draw.polygon(screen, BLACK, point)
             else: 
                 pygame.draw.rect(screen, BLACK, structure)
-                
+
+        if scene == 16:
+            # Rope
+            for i in range(len(rope_points) - 1):
+                p1 = (int(rope_points[i][0]), int(rope_points[i][1]))
+                p2 = (int(rope_points[i + 1][0]),int(rope_points[i + 1][1]))
+                pygame.draw.line(screen, (255, 223, 0), p1, p2, 4)
+            
+            for i, point in enumerate(rope_points):
+                pygame.draw.circle(screen, (229, 184, 11), (int(point[0]), int(point[1])), 4)
+            
+            # Ball
+            pygame.draw.circle(screen, (229, 185, 11), (int(rope_points[0][0]), int(rope_points[0][1])), 10)            
 
         return barriers, platforms, structures, coin, hearts
 
@@ -1274,15 +1264,35 @@ async def main ():
                 lives = lose_life(lives)
                 
     # 4 - You’ve reached the end of the line…
+
         elif order == 4: 
             script = [phone_script[6], phone_script[7]]
             x = [100, 100]
             
-    # Ending 1 
+    # BAD Ending 
 
-    # Ending 2
+        elif order == 5:
+            script = ["Please Remain on the Line", 
+                        "Created by: Koi", 
+                        "Design & Code: Koi", 
+                        "Art: erza_rove", 
+                        "Music / SFX: Koi", 
+                        "Play Testers: Roomies", # Add Benton/ask
+                        "Built with: Python 3.12 - Pygame (pygame.org)", 
+                        "Font: 'Nokia Cellphone FC' by Zeh Fernando", 
+                        "Made for: Mines Game Development Club 2026 Fall Game Jam",
+                        "Theme: 'End of the Line'"] 
+            
+            x = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20]
 
-    
+    # GOOD Ending 
+
+        elif order == 6:
+            script = ["Hello?", "This is the Suicide & Crisis Lifeline.", "How may I help you?"]
+
+            x = [20, 20, 20]
+
+
         # Type-y Text Effect
         if current_line < len(script):
             target_text = script[current_line]
@@ -1532,13 +1542,16 @@ async def main ():
                             
 
                 if scene == 3 or scene == 7 or scene == 11 or scene == 15:
-                    draw_phonebooth()
+                    draw_phonebooth(phone_x=480, phone_y=GROUND - 130)
                     if coin_count > 0:        
-                        if character.colliderect(draw_phonebooth()):
+                        if character.colliderect(draw_phonebooth(phone_x=480, phone_y=GROUND - 130)):
                             pygame.draw.rect(screen, BLACK, (200, 400, 200, 100))  
                             draw_text("Use Coin?", 235, 410) 
                             draw_text("Yes", 225, 460) 
-                            draw_text("No", 334, 460) 
+                            draw_text("No", 334, 460)                     
+                elif scene == 16:
+                    draw_phonebooth(phone_x=320, phone_y=360)
+                    
 
                 # Rope collision
                 rope_collision = False
