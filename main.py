@@ -87,7 +87,7 @@ async def main ():
     life = False
     respawn = False
 
-    scene = 1 # Switch Back to 0
+    scene = 0 
     time = 5
 
     x_rope = 0
@@ -133,6 +133,11 @@ async def main ():
         snow_speed = random.uniform(1, 3)
         snow.append([x_snow, y_snow, snow_speed])
 
+    char_index = 0
+    frame_counter = 0
+    current_text = ""
+    current_line = 0
+    completed_lines = []
     
 
 # FILES
@@ -776,7 +781,7 @@ async def main ():
 
 
 # LEVEL / SCENES
-    def get_scene(scene, coin_collected, heart_collected, is_visible):
+    def get_scene(scene, coin_collected, heart_collected, is_visible, char_index, frame_counter, current_text, current_line, completed_lines):
         barriers = []
         off_barriers = []
         platforms = []
@@ -785,13 +790,34 @@ async def main ():
         hearts = []
     # 0 - Phone Call / Home 
 
-        if scene == 0: # Ignore for now
+        if scene == 0: 
             screen.fill(BLACK)
+
             # MAKE TYPE-Y
             call_scene = ["Hello?", "How can I help you?", "Hello?", "Are you there?", "Hello...?", ] 
-            for i in range(len(call_scene)):
-                draw_text(call_scene[i], 20, 20 + (i * 80))
-               # pygame.display.flip()
+
+            if current_line < len(call_scene):
+                target_text = call_scene[current_line]
+
+                if char_index < len(target_text):
+                    frame_counter += 1
+                    if frame_counter >= 5:
+                        frame_counter = 0  
+                        char_index += 1    
+                        current_text = target_text[:char_index]
+                else: 
+                    completed_lines.append(target_text)
+                    current_line += 1
+                    char_index = 0
+                    current_text = ""
+
+            for i in range(len(completed_lines)):
+                draw_text(completed_lines[i], 20, 20 + (i * 80))
+
+            if current_text != "" and current_line < len(call_scene):
+                draw_text(current_text, 20, 20 + (current_line * 80))
+
+            return current_line, char_index, frame_counter, current_text, completed_lines
             
 
         elif scene == 1:
@@ -1162,27 +1188,37 @@ async def main ():
 
 # PHONE BOOTH CUT-SCENES
 
-    def phone_call(order, phone_script, phone_answer, lives):
+    def phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines):
         screen.fill((0, 0, 0))
 
     # Intro 
         if order == 0: 
-            draw_text(phone_script[0], 100, 200)
-            draw_text(phone_script[1], 100, 300)
+            script = [phone_script[0], phone_script[1]]
+            x = [100, 100]
             draw_text("Yes", 225, 600) 
             draw_text("No", 334, 600)
 
             if phone_answer != None:
                 order = 1
+                char_index = 0
+                frame_counter = 0
+                current_text = ""
+                current_line = 0
+                completed_lines = []
             
     # 1 - “Have you had thoughts about how you might do this?” 
         elif order == 1: 
-            draw_text(phone_script[2], 130, 200)
-            draw_text(phone_script[3], 80, 250)
+            script = [phone_script[2], phone_script[3]]
+            x = [130, 80]
             draw_text("Yes", 225, 600) 
             draw_text("No", 334, 600) 
             if phone_answer != None:
                 order = 2
+                char_index = 0
+                frame_counter = 0
+                current_text = ""
+                current_line = 0
+                completed_lines = []
             
             if phone_answer == True:
                 lives = lose_life(lives)
@@ -1190,34 +1226,73 @@ async def main ():
                 
     # 2 - “Are you safe?”
         elif order == 2: 
-            draw_text(phone_script[4], 200, 200)
+            script = [phone_script[4]]
+            x = [200]
             draw_text("Yes", 225, 600) 
             draw_text("No", 334, 600) 
             if phone_answer != None:
                 order = 3
+                char_index = 0
+                frame_counter = 0
+                current_text = ""
+                current_line = 0
+                completed_lines = []
 
             if phone_answer == False:
                 lives = lose_life(lives)
                 
     # 3 - “Do you need help?”
         elif order == 3: 
-            draw_text(phone_script[5], 180, 200)
+            script = [phone_script[5]]
+            x = [180]
             draw_text("Yes", 225, 600) 
             draw_text("No", 334, 600) 
             if phone_answer != None:
                 order = 4
+                char_index = 0
+                frame_counter = 0
+                current_text = ""
+                current_line = 0
+                completed_lines = []
 
             if phone_answer == False:
                 lives = lose_life(lives)
                 
     # 4 - You’ve reached the end of the line…
         elif order == 4: 
-            draw_text(phone_script[6], 100, 200)
-            draw_text(phone_script[7], 100, 250)
+            script = [phone_script[6], phone_script[7]]
+            x = [100, 100]
+            
     # Ending 1 
 
     # Ending 2
-        return order, phone_answer, lives
+
+    
+        # Type-y Text Effect
+        if current_line < len(script):
+            target_text = script[current_line]
+        
+            if char_index < len(target_text):
+                frame_counter += 1
+                if frame_counter >= 5:
+                    frame_counter = 0  
+                    char_index += 1    
+                    current_text = target_text[:char_index]
+            else: 
+                completed_lines.append(target_text)
+                current_line += 1
+                char_index = 0
+                current_text = ""
+        
+        for i in range(len(completed_lines)):
+            draw_text(completed_lines[i], x[i], 200 + (i * 50))
+                
+        if current_text != "" and current_line < len(script):
+            draw_text(current_text, x[current_line], 200 + (current_line * 50))
+
+        
+        return order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines
+
         
 
 
@@ -1305,6 +1380,14 @@ async def main ():
                             idx += 1
                         tut_screen = False
 
+                if scene == 0:
+                    if event.key == pygame.K_RETURN:
+                        scene = 1
+                        char_index = 0
+                        frame_counter = 0
+                        current_text = ""
+                        current_line = 0
+                        completed_lines = []
 
         if start == False:
             screen.blit(START_SCREEN, (0,0))
@@ -1312,7 +1395,7 @@ async def main ():
             pygame.draw.rect(screen, (0, 117, 180), start_button)
             draw_text("START", 255, 660, color=WHITE)
         elif scene == 0: 
-            get_scene(scene, None, None, None)
+            current_line, char_index, frame_counter, current_text, completed_lines = get_scene(scene, None, None, None, char_index, frame_counter, current_text, current_line, completed_lines)
         else: 
             if coin_yes == None:
                 if scene == 1:
@@ -1343,7 +1426,7 @@ async def main ():
                 if current_time >= blink:
                     is_visible = not is_visible
                     blink = current_time + 4000
-                barriers, platforms, structures, coin, hearts = get_scene(scene, coin_collected, heart_collected, is_visible)
+                barriers, platforms, structures, coin, hearts = get_scene(scene, coin_collected, heart_collected, is_visible, None, None, None, None, None)
                 walls()
 
                 if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 16:
@@ -1480,7 +1563,7 @@ async def main ():
                 else:
                     life = False
 
-            # Check Lives
+            # Check Lives / GAME OVER
                 if lives <= 0:
                     start = False
                     # Resets
@@ -1494,6 +1577,13 @@ async def main ():
                     throw_rope = False
                     for i in range(len(tut_text)):
                         tut_track[i] = False
+
+                    # Intro scene resets
+                    char_index = 0
+                    frame_counter = 0
+                    current_text = ""
+                    current_line = 0
+                    completed_lines = []
 
 
             # Platforms
@@ -1596,7 +1686,7 @@ async def main ():
                         if phone_ringing == False:
                             RINGTONE.play(-1)  
                             phone_ringing = True
-                        order, phone_answer, lives = phone_call(order, phone_script, phone_answer, lives) 
+                        order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines = phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines) 
                         if phone_answer != None:
                             RINGTONE.stop()
                             phone_ringing = False
