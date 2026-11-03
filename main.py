@@ -317,11 +317,26 @@ async def main ():
             surface.blit(line_surf, (x, y + i * sfont.get_height()))
 
 # TUTORIAL
-    def tutorial(tut_text, idx, tut_track):
+    def tutorial(tut_text, idx, tut_track, char_index, frame_counter, current_text):
         pygame.draw.rect(screen, BLACK, (150, 300, 300, 170))  
-        wrap(screen, tut_text[idx], font, WHITE, 160, 320, 75)
+       # wrap(screen, tut_text[idx], font, WHITE, 160, 320, 75)
+        if idx < len(tut_text):
+            target_text = tut_text[idx]
+            
+            if char_index < len(target_text):
+                frame_counter += 1
+                if frame_counter >= 5:
+                    frame_counter = 0  
+                    char_index += 1    
+                    current_text = target_text[:char_index]
+                        
+        if current_text != "" and idx < len(tut_text):
+            wrap(screen, current_text, font, WHITE, 160, 320, 75)
+        
         draw_text("RETURN", 250, 430) 
         tut_track[idx] = True
+
+        return char_index, frame_counter, current_text
 
 
 # RESET
@@ -1378,6 +1393,10 @@ async def main ():
                     if event.key == pygame.K_RETURN:
                         if throw_rope == True:
                             idx += 1
+                        char_index = 0    
+                        frame_counter = 0
+                        current_text = ""
+                        
                         tut_screen = False
 
                 if scene == 0:
@@ -1445,7 +1464,7 @@ async def main ():
                 # TUT
                 if scene <= 4:
                     if tut_screen == True:
-                        tutorial(tut_text, idx, tut_track)
+                        char_index, frame_counter, current_text = tutorial(tut_text, idx, tut_track, char_index, frame_counter, current_text)
 
                 if scene == 3 and grounded == True and tut_track[7] == False:
                     idx = 7
