@@ -1512,7 +1512,7 @@ async def main ():
                     is_visible = not is_visible
                     blink = current_time + 4000
                 barriers, platforms, structures, coin, hearts = get_scene(scene, coin_collected, heart_collected, is_visible, None, None, None, None, None)
-                walls()
+                wall1, wall2 = walls()
 
                 if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 16:
                     floor = ground()
@@ -1636,6 +1636,26 @@ async def main ():
                     touch_y = None
                     swing = False
                     touch_rope = False
+
+                # Swinging Collisions
+                if swing == True:
+                    for barrier in barriers:
+                        if hit_box.colliderect(barrier[1]):
+                            touch_rope = False
+                            throw_rope = False
+                    for platform in platforms:
+                        if character.colliderect(platform) and grounded == False:
+                            touch_rope = False
+                            throw_rope = False
+                    if character.colliderect(wall1) or character.colliderect(wall2):
+                        touch_rope = False
+                        throw_rope = False
+                    for structure in structures:
+                        if not isinstance(structure, Polygon):    
+                            if character.colliderect(structure):
+                                touch_rope = False
+                                throw_rope = False
+
 
 
             # Barriers  
