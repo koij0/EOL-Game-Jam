@@ -362,11 +362,16 @@ async def main ():
              
 
 # PLAYER
-    def player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y):
+    def player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, grounded):
         now = pygame.time.get_ticks()
     # Sprite Rendering
 
-        if touch_rope == True and grounded == False:
+        if swing == True:
+            player_rotated = pygame.transform.rotate(PLAYER_CLIMB, math.degrees(angle))
+            character = player_rotated.get_rect(topleft = (x, y))
+            screen.blit(player_rotated, character)
+
+        elif touch_rope == True and grounded == False:
             character = PLAYER_CLIMB.get_rect(topleft = (x, y)) 
             screen.blit(PLAYER_CLIMB, character)
         elif jumped == True: # or grounded == False:
@@ -438,9 +443,21 @@ async def main ():
                     y_loc = touch_y
 
                     if keys[pygame.K_RIGHT] or keys[pygame.K_LEFT]:
-                        swing = True
-                        x_loc = rope_points[-1][0] - 22
-                        y_loc = rope_points[-3][1] - 22
+                        swing = True 
+                        touch_y = character.centery
+
+                        min_error = float('inf')
+                        pos = 0
+                        for i in range(len(rope_points)):
+                            error = abs(touch_y - rope_points[i][1])
+                            if error < min_error:
+                                min_error = error
+                                pos = i
+                        character.center = (rope_points[pos][0], rope_points[pos][1]) 
+
+                        x_loc = character.x
+                        y_loc = character.y
+
 
                     else:
                         swing = False
@@ -614,6 +631,9 @@ async def main ():
 
         # Ball
         pygame.draw.circle(screen, (229, 185, 11), (int(anchor_x), int(anchor_y)), 10)
+
+
+
 
         return angle, angle_velocity, x_velocity, y_velocity
 
@@ -1533,7 +1553,7 @@ async def main ():
                     y = GROUND - 110
                     respawn = False
 
-                player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y)
+                player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, grounded)
                 
                 
 
@@ -1553,7 +1573,7 @@ async def main ():
                     angle, angle_velocity, x_velocity, y_velocity = rope(rope_points, angle, angle_velocity, swing, x_velocity, y_velocity, keys)
             
             # MOVE      
-                character, animate_time, frame = player(jumped, grounded, walking_l, walking_r, animate_time, touch_rope, frame, x, y)  
+                character, animate_time, frame = player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, grounded)  
                 grounded, x, y, swing, jumped, time, throw_rope, no_move, walking_l, walking_r = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r)
                 grounded, x, y, scene, x_velocity, y_velocity, jumped, throw_rope = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope, throw_rope)
 
