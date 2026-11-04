@@ -143,6 +143,9 @@ async def main ():
     ending = None 
     line_x = 0
     p = 0
+    prev_x = 0
+    base_y = 98
+    prev_y = base_y
     
 
 # FILES
@@ -1210,8 +1213,8 @@ async def main ():
 
 # PHONE BOOTH CUT-SCENES
 
-    def phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines, line_x, ending, p):
-        screen.fill((0, 0, 0))
+    def phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines, line_x, ending, p, prev_x, prev_y, base_y):
+        screen.fill(BLACK)
 
     # Intro 
         if order == 0: 
@@ -1330,17 +1333,25 @@ async def main ():
             elif ending == 5:
                 pattern = [0, 1.5, -1.5, 0, 2, -2, 5, -10, 10]
 
-                if p > len(pattern) - 1:
+                if line_x == 0:
+                    prev_x = 0
+                    prev_y = base_y
+
+                if p >= len(pattern):
                     p = 0
+
                 if line_x < 600:
-                    line_x += 1
-                    pygame.draw.line(screen, GOLD, (0, 98), (line_x, 98 + (10 * pattern[p])), 4)
+                    line_x += 20
+                    current_y = base_y + (8 * pattern[p])
+        
+                    pygame.draw.line(screen, GOLD, (prev_x, prev_y), (line_x, current_y), 4)
+                    
+                    prev_x = line_x
+                    prev_y = current_y
                     p += 1
+
                 else:
                     line_x = 0
-
-
-    
 
 
         # Type-y Text Effect
@@ -1366,7 +1377,7 @@ async def main ():
             draw_text(current_text, x[current_line], 200 + (current_line * 50))
 
         
-        return order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines, line_x, p
+        return order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines, line_x, p, prev_x, prev_y, base_y
 
         
 
@@ -1816,7 +1827,7 @@ async def main ():
                         if phone_ringing == False:
                             RINGTONE.play(-1)  
                             phone_ringing = True
-                        order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines, line_x, p = phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines, line_x, ending, p) 
+                        order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines, line_x, p, prev_x, prev_y, base_y = phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines, line_x, ending, p, prev_x, prev_y, base_y) 
                         if phone_answer != None:
                             RINGTONE.stop()
                             phone_ringing = False
