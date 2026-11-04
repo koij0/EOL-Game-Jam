@@ -87,7 +87,7 @@ async def main ():
     life = False
     respawn = False
 
-    scene = 0 
+    scene = 15 
     time = 5
 
     x_rope = 0
@@ -1284,8 +1284,11 @@ async def main ():
 
     # BAD Ending 
         elif order == 4: 
-            script = [phone_script[6], phone_script[7]]
-            x = [100, 100]
+            script = [phone_script[6]]
+            x = [30]
+
+            draw_text("RETURN", 243, 600) 
+            
 
     # GOOD Ending 
         elif order == 5:
@@ -1297,6 +1300,9 @@ async def main ():
                         "Thank you for Remaining on the Line."]
     
             x = [20, 20, 20, 20, 20, 20]
+
+            draw_text("RETURN", 243, 600) 
+            
 
     # CREDITS
         elif order == 6:
@@ -1312,7 +1318,7 @@ async def main ():
                         "Club 2026 Fall Game Jam",
                         "Theme: 'End of the Line'"] 
             
-            x = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20]
+            x = [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
 
             if ending == 4:
                 if line_x < 600:
@@ -1320,16 +1326,19 @@ async def main ():
                     pygame.draw.line(screen, GOLD, (0, 98), (line_x, 98), 4)
                 else:
                     line_x = 0
+
             elif ending == 5:
                 pattern = [0, 1.5, -1.5, 0, 2, -2, 5, -10, 10]
-                if p >= len(pattern):
+
+                if p > len(pattern) - 1:
                     p = 0
                 if line_x < 600:
                     line_x += 1
+                    pygame.draw.line(screen, GOLD, (0, 98), (line_x, 98 + (10 * pattern[p])), 4)
                     p += 1
-                    pygame.draw.line(screen, GOLD, (0, 98), (line_x, 98 * pattern[p]), 4)
                 else:
                     line_x = 0
+
 
     
 
@@ -1447,6 +1456,17 @@ async def main ():
                         if scene == 15:
                             ending = 4
 
+                    if order == 4 or order == 5:
+                        if event.key == pygame.K_RETURN:
+                            char_index = 0    
+                            frame_counter = 0
+                            current_text = ""
+                            completed_lines = []
+                            current_line = 0
+                            order = 6
+                            
+                        
+
                 if tut_screen == True:
                     if event.key == pygame.K_RETURN:
                         if throw_rope == True:
@@ -1471,6 +1491,8 @@ async def main ():
                         coin_yes = True
                         order = ending
                         phone_screen = True
+
+                 
 
 
 
