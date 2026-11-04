@@ -880,11 +880,6 @@ async def main ():
             structures.append(pygame.Rect(210, 0, 40, 435))
             structures.append(Polygon([(210, 335), (210, 435), (360, 435)]))
 
-           # platforms.append(pygame.Rect(0, 500, 250, 150)) 
-           # platforms.append(pygame.Rect(250, 550, 100, 100)) 
-           # platforms.append(pygame.Rect(350, 600, 100, 50)) 
-
-
             barriers.append([pygame.transform.scale(WIRE2, (360, 60)), (pygame.transform.scale(WIRE2, (360, 60))).get_rect(topleft = (240, 235))]) 
 
 
@@ -1418,10 +1413,11 @@ async def main ():
                 if coin_yes == None:
                     if event.key == pygame.K_y:
                         coin_yes = True
+                        tut_screen = False
                     if event.key == pygame.K_n:
                         coin_yes = False
 
-                elif coin_yes == True:
+                elif coin_yes == True and call == True:
                     if event.key == pygame.K_y:
                         phone_answer = True
                         if scene == 15:
@@ -1465,7 +1461,7 @@ async def main ():
             draw_text("START", 255, 660, color=WHITE)
         elif scene == 0: 
             current_line, char_index, frame_counter, current_text, completed_lines = get_scene(scene, None, None, None, char_index, frame_counter, current_text, current_line, completed_lines)
-        else: 
+        elif start == True: 
             if coin_yes == None:
                 if scene == 1:
                     screen.blit(BH1, (0,0))
@@ -1642,25 +1638,8 @@ async def main ():
 
             # Check Lives / GAME OVER
                 if lives <= 0:
-                    start = False
-                    # Resets
-                    lives = 9
-                    coin = 1
-                    scene = 1
-                    x = 20
-                    y = 100
-                    coin_collected = False
-                    heart_collected = False
-                    throw_rope = False
-                    for i in range(len(tut_text)):
-                        tut_track[i] = False
-
-                    # Intro scene resets
-                    char_index = 0
-                    frame_counter = 0
-                    current_text = ""
-                    current_line = 0
-                    completed_lines = []
+                    start = None
+                
 
 
             # Platforms
@@ -1792,6 +1771,9 @@ async def main ():
                 x = 390
                 coin_yes = None
 
+        else:
+            screen.fill(BLACK)
+            draw_text("GAME OVER", 230, 400)
             
         pygame.display.flip()
             
