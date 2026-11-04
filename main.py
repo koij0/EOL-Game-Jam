@@ -122,7 +122,7 @@ async def main ():
     seq_played = False
 
     blink = 0
-    is_visible = False
+    is_visible = True
 
     phone_ringing = False
 
@@ -959,54 +959,60 @@ async def main ():
         # 2 - 
 
         elif scene == 8:
-            platforms.append(pygame.Rect(10, 150, 150, 15))
-            platforms.append(pygame.Rect(290, 150, 150, 15))
+            platforms.append(pygame.Rect(10, 200, 150, 15)) 
+            platforms.append(pygame.Rect(440, 200, 150, 15))
 
-            structures.append(pygame.Rect(130, 165, 30, 90)) 
-            structures.append(pygame.Rect(290, 165, 30, 90)) 
+            platforms.append(pygame.Rect(200, 400, 200, 15)) 
 
-            barriers.append([pygame.transform.scale(WIRE2, (130, 60)), (pygame.transform.scale(WIRE2, (130, 60))).get_rect(topleft = (160, 220))]) 
+            platforms.append(pygame.Rect(10, 600, 150, 15))
+            platforms.append(pygame.Rect(440, 600, 150, 15))
 
-            platforms.append(pygame.Rect(440, 450, 150, 15))
-            structures.append(pygame.Rect(440, 465, 30, 70)) 
-           
-            barriers.append([pygame.transform.scale(WIRE2, (120, 60)), (pygame.transform.scale(WIRE2, (120, 60))).get_rect(topleft = (325, 500))]) 
+            platforms.append(pygame.Rect(200, 785, 200, 15))
+
+
+            if is_visible == True:
+                barriers.append([pygame.transform.scale(WIRE2, (280, 60)), (pygame.transform.scale(WIRE2, (280, 60))).get_rect(topleft = (160, 180))]) 
+                barriers.append([pygame.transform.scale(WIRE2, (190, 60)), (pygame.transform.scale(WIRE2, (190, 60))).get_rect(topleft = (10, 380))]) 
+                barriers.append([pygame.transform.scale(WIRE2, (190, 60)), (pygame.transform.scale(WIRE2, (190, 60))).get_rect(topleft = (400, 380))]) 
+                barriers.append([pygame.transform.scale(WIRE2, (280, 60)), (pygame.transform.scale(WIRE2, (280, 60))).get_rect(topleft = (160, 580))]) 
+                barriers.append([pygame.transform.scale(WIRE2, (190, 60)), (pygame.transform.scale(WIRE2, (190, 60))).get_rect(topleft = (10, 765))]) 
+                barriers.append([pygame.transform.scale(WIRE2, (190, 60)), (pygame.transform.scale(WIRE2, (190, 60))).get_rect(topleft = (400, 765))]) 
             
-            structures.append(pygame.Rect(300, 465, 30, 70)) 
-            platforms.append(pygame.Rect(180, 450, 150, 15))
-
-            platforms.append(pygame.Rect(10, 700, 150, 15))
-            platforms.append(pygame.Rect(290, 700, 150, 15))
-
-            structures.append(pygame.Rect(130, 715, 30, 70)) 
-            structures.append(pygame.Rect(290, 715, 30, 70)) 
-
-            barriers.append([pygame.transform.scale(WIRE2, (130, 60)), (pygame.transform.scale(WIRE2, (130, 60))).get_rect(topleft = (160, 750))]) 
+            else:
+                off_barriers.append([pygame.transform.scale(WIRE1, (280, 10)), (pygame.transform.scale(WIRE1, (280, 10))).get_rect(topleft = (160, 200))]) 
+                off_barriers.append([pygame.transform.scale(WIRE1, (190, 10)), (pygame.transform.scale(WIRE1, (190, 10))).get_rect(topleft = (10, 400))]) 
+                off_barriers.append([pygame.transform.scale(WIRE1, (190, 10)), (pygame.transform.scale(WIRE1, (190, 10))).get_rect(topleft = (400, 400))]) 
+                off_barriers.append([pygame.transform.scale(WIRE1, (280, 10)), (pygame.transform.scale(WIRE1, (280, 10))).get_rect(topleft = (160, 600))]) 
+                off_barriers.append([pygame.transform.scale(WIRE1, (190, 10)), (pygame.transform.scale(WIRE1, (190, 10))).get_rect(topleft = (10, 785))]) 
+                off_barriers.append([pygame.transform.scale(WIRE1, (190, 10)), (pygame.transform.scale(WIRE1, (190, 10))).get_rect(topleft = (400, 785))]) 
+            
+            
 
 
         elif scene == 9:
-            platforms.append(pygame.Rect(300, 200, 300, 15))
+            platforms.append(pygame.Rect(10, 200, 200, 15))
+            platforms.append(pygame.Rect(400, 200, 200, 15))
 
-            platforms.append(pygame.Rect(300, 400, 300, 15))
+            platforms.append(pygame.Rect(400, 400, 300, 15))
             
-            structures.append(pygame.Rect(300, 410, 20, 200))
+            structures.append(pygame.Rect(400, 410, 20, 100))
 
             if not coin_collected: 
-                coin = gen_coin(440, 500)
+                coin = gen_coin(540, 500)
 
             if not heart_collected: 
-                hearts = gen_heart(450, 350)
+                hearts = gen_heart(550, 350)
 
             platforms.append(pygame.Rect(10, 785, 400, 15))
 
             if is_visible == True:
-                barriers.append([pygame.transform.scale(WIRE2, (300, 60)), (pygame.transform.scale(WIRE2, (300, 60))).get_rect(topleft = (9, 180))]) 
-                barriers.append([pygame.transform.scale(WIRE2, (300, 60)), (pygame.transform.scale(WIRE2, (300, 60))).get_rect(topleft = (9, 380))]) 
+                barriers.append([pygame.transform.scale(WIRE2, (190, 60)), (pygame.transform.scale(WIRE2, (190, 60))).get_rect(topleft = (209, 180))]) 
+                barriers.append([pygame.transform.scale(WIRE2, (400, 60)), (pygame.transform.scale(WIRE2, (400, 60))).get_rect(topleft = (9, 380))]) 
                 barriers.append([pygame.transform.scale(WIRE2, (180, 60)), (pygame.transform.scale(WIRE2, (180, 60))).get_rect(topleft = (420, 765))]) 
 
             else:
-                off_barriers.append([pygame.transform.scale(WIRE1, (300, 10)), (pygame.transform.scale(WIRE1, (300, 10))).get_rect(topleft = (10, 200))]) 
-                off_barriers.append([pygame.transform.scale(WIRE1, (300, 10)), (pygame.transform.scale(WIRE1, (300, 10))).get_rect(topleft = (10, 400))]) 
+                off_barriers.append([pygame.transform.scale(WIRE1, (190, 10)), (pygame.transform.scale(WIRE1, (190, 10))).get_rect(topleft = (210, 200))]) 
+                off_barriers.append([pygame.transform.scale(WIRE1, (400, 10)), (pygame.transform.scale(WIRE1, (400, 10))).get_rect(topleft = (10, 400))]) 
                 off_barriers.append([pygame.transform.scale(WIRE1, (180, 10)), (pygame.transform.scale(WIRE1, (180, 10))).get_rect(topleft = (420, 785))]) 
                 
 
@@ -1043,33 +1049,29 @@ async def main ():
         # 3 - 
 
         elif scene == 12: 
-            platforms.append(pygame.Rect(10, 200, 150, 15)) 
-            platforms.append(pygame.Rect(440, 200, 150, 15))
+            platforms.append(pygame.Rect(10, 150, 150, 15))
+            platforms.append(pygame.Rect(290, 150, 150, 15))
 
-            platforms.append(pygame.Rect(200, 400, 200, 15)) 
+            structures.append(pygame.Rect(130, 165, 30, 90)) 
+            structures.append(pygame.Rect(290, 165, 30, 90)) 
 
-            platforms.append(pygame.Rect(10, 600, 150, 15))
-            platforms.append(pygame.Rect(440, 600, 150, 15))
+            barriers.append([pygame.transform.scale(WIRE2, (130, 60)), (pygame.transform.scale(WIRE2, (130, 60))).get_rect(topleft = (160, 220))]) 
 
-            platforms.append(pygame.Rect(200, 785, 200, 15))
-
-
-            if is_visible == True:
-                barriers.append([pygame.transform.scale(WIRE2, (280, 60)), (pygame.transform.scale(WIRE2, (280, 60))).get_rect(topleft = (160, 180))]) 
-                barriers.append([pygame.transform.scale(WIRE2, (190, 60)), (pygame.transform.scale(WIRE2, (190, 60))).get_rect(topleft = (10, 380))]) 
-                barriers.append([pygame.transform.scale(WIRE2, (190, 60)), (pygame.transform.scale(WIRE2, (190, 60))).get_rect(topleft = (400, 380))]) 
-                barriers.append([pygame.transform.scale(WIRE2, (280, 60)), (pygame.transform.scale(WIRE2, (280, 60))).get_rect(topleft = (160, 580))]) 
-                barriers.append([pygame.transform.scale(WIRE2, (190, 60)), (pygame.transform.scale(WIRE2, (190, 60))).get_rect(topleft = (10, 765))]) 
-                barriers.append([pygame.transform.scale(WIRE2, (190, 60)), (pygame.transform.scale(WIRE2, (190, 60))).get_rect(topleft = (400, 765))]) 
+            platforms.append(pygame.Rect(440, 450, 150, 15))
+            structures.append(pygame.Rect(440, 465, 30, 70)) 
+           
+            barriers.append([pygame.transform.scale(WIRE2, (120, 60)), (pygame.transform.scale(WIRE2, (120, 60))).get_rect(topleft = (325, 500))]) 
             
-            else:
-                off_barriers.append([pygame.transform.scale(WIRE1, (280, 10)), (pygame.transform.scale(WIRE1, (280, 10))).get_rect(topleft = (160, 200))]) 
-                off_barriers.append([pygame.transform.scale(WIRE1, (190, 10)), (pygame.transform.scale(WIRE1, (190, 10))).get_rect(topleft = (10, 400))]) 
-                off_barriers.append([pygame.transform.scale(WIRE1, (190, 10)), (pygame.transform.scale(WIRE1, (190, 10))).get_rect(topleft = (400, 400))]) 
-                off_barriers.append([pygame.transform.scale(WIRE1, (280, 10)), (pygame.transform.scale(WIRE1, (280, 10))).get_rect(topleft = (160, 600))]) 
-                off_barriers.append([pygame.transform.scale(WIRE1, (190, 10)), (pygame.transform.scale(WIRE1, (190, 10))).get_rect(topleft = (10, 785))]) 
-                off_barriers.append([pygame.transform.scale(WIRE1, (190, 10)), (pygame.transform.scale(WIRE1, (190, 10))).get_rect(topleft = (400, 785))]) 
+            structures.append(pygame.Rect(300, 465, 30, 70)) 
+            platforms.append(pygame.Rect(180, 450, 150, 15))
 
+            platforms.append(pygame.Rect(10, 700, 150, 15))
+            platforms.append(pygame.Rect(290, 700, 150, 15))
+
+            structures.append(pygame.Rect(130, 715, 30, 70)) 
+            structures.append(pygame.Rect(290, 715, 30, 70)) 
+
+            barriers.append([pygame.transform.scale(WIRE2, (130, 60)), (pygame.transform.scale(WIRE2, (130, 60))).get_rect(topleft = (160, 750))])              
 
         elif scene == 13: 
             platforms.append(pygame.Rect(10, 200, 130, 15))
@@ -1641,20 +1643,24 @@ async def main ():
                 if swing == True:
                     for barrier in barriers:
                         if hit_box.colliderect(barrier[1]):
+                            swing = False
                             touch_rope = False
-                            throw_rope = False
                     for platform in platforms:
                         if character.colliderect(platform) and grounded == False:
+                            swing = False
                             touch_rope = False
-                            throw_rope = False
+
                     if character.colliderect(wall1) or character.colliderect(wall2):
+                        swing = False
                         touch_rope = False
-                        throw_rope = False
+
                     for structure in structures:
                         if not isinstance(structure, Polygon):    
                             if character.colliderect(structure):
+                                swing = False
                                 touch_rope = False
-                                throw_rope = False
+
+
 
 
 
