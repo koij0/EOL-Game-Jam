@@ -87,7 +87,7 @@ async def main ():
     life = False
     respawn = False
 
-    scene = 15 # CHEATING
+    scene = 0 
     time = 5
 
     x_rope = 0
@@ -140,6 +140,8 @@ async def main ():
     completed_lines = []
 
     ending = None 
+    line_x = 0
+    p = 0
     
 
 # FILES
@@ -834,6 +836,8 @@ async def main ():
             if current_text != "" and current_line < len(call_scene):
                 draw_text(current_text, 20, 20 + (current_line * 80))
 
+            draw_text("HIT RETURN", 20, 600)
+
             return current_line, char_index, frame_counter, current_text, completed_lines
             
 
@@ -1193,7 +1197,7 @@ async def main ():
 
 # PHONE BOOTH CUT-SCENES
 
-    def phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines):
+    def phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines, line_x, ending, p):
         screen.fill((0, 0, 0))
 
     # Intro 
@@ -1263,34 +1267,58 @@ async def main ():
             if phone_answer == False:
                 lives = lose_life(lives)
                 
-    # 4 - You’ve reached the end of the line…
+    # 4 - Ending
 
+    # BAD Ending 
         elif order == 4: 
             script = [phone_script[6], phone_script[7]]
             x = [100, 100]
-            
-    # BAD Ending 
-
-        elif order == 5:
-            script = ["Please Remain on the Line", 
-                        "Created by: Koi", 
-                        "Design & Code: Koi", 
-                        "Art: erza_rove", 
-                        "Music / SFX: Koi", 
-                        "Play Testers: Roomies", # Add Benton/ask
-                        "Built with: Python 3.12 - Pygame (pygame.org)", 
-                        "Font: 'Nokia Cellphone FC' by Zeh Fernando", 
-                        "Made for: Mines Game Development Club 2026 Fall Game Jam",
-                        "Theme: 'End of the Line'"] 
-            
-            x = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20]
 
     # GOOD Ending 
+        elif order == 5:
+            script = ["Connecting...",
+                        "",
+                        "Hello?", 
+                        "This is the Suicide & Crisis Lifeline.", 
+                        "",
+                        "Thank you for Remaining on the Line."]
+    
+            x = [20, 20, 20, 20, 20, 20]
 
+    # CREDITS
         elif order == 6:
-            script = ["Hello?", "This is the Suicide & Crisis Lifeline.", "How may I help you?"]
+            script = ["Please remain on the line...", 
+                        "",
+                        "Design / Code / Music / SFX: Koi", 
+                        "Art: ezra_rove", 
+                        "Play Testers: Roomies", 
+                        "Built with: Python 3.12 - Pygame", 
+                        "Font: 'Nokia Cellphone FC'", 
+                        "by Zeh Fernando", 
+                        "Made for: Mines Game Development",
+                        "Club 2026 Fall Game Jam",
+                        "Theme: 'End of the Line'"] 
+            
+            x = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20]
 
-            x = [20, 20, 20]
+            if ending == 4:
+                if line_x < 600:
+                    line_x += 1
+                    pygame.draw.line(screen, GOLD, (0, 98), (line_x, 98), 4)
+                else:
+                    line_x = 0
+            elif ending == 5:
+                pattern = [0, 1.5, -1.5, 0, 2, -2, 5, -10, 10]
+                if p >= len(pattern):
+                    p = 0
+                if line_x < 600:
+                    line_x += 1
+                    p += 1
+                    pygame.draw.line(screen, GOLD, (0, 98), (line_x, 98 * pattern[p]), 4)
+                else:
+                    line_x = 0
+
+    
 
 
         # Type-y Text Effect
@@ -1316,7 +1344,7 @@ async def main ():
             draw_text(current_text, x[current_line], 200 + (current_line * 50))
 
         
-        return order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines
+        return order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines, line_x, p
 
         
 
@@ -1349,7 +1377,7 @@ async def main ():
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos  
-                if phone_ringing == False and scene != 16:
+                if phone_ringing == False:
                     if seq_played == True:   
                         s, flash_timer, call = dial(buttons, sequence, mouse_pos, s, flash_timer)
 
@@ -1396,9 +1424,12 @@ async def main ():
                 elif coin_yes == True:
                     if event.key == pygame.K_y:
                         phone_answer = True
+                        if scene == 15:
+                            ending = 5
                     elif event.key == pygame.K_n:
                         phone_answer = False
-
+                        if scene == 15:
+                            ending = 4
                 if tut_screen == True:
                     if event.key == pygame.K_RETURN:
                         if throw_rope == True:
@@ -1408,6 +1439,7 @@ async def main ():
                         current_text = ""
                         
                         tut_screen = False
+                
 
                 if scene == 0:
                     if event.key == pygame.K_RETURN:
@@ -1417,6 +1449,14 @@ async def main ():
                         current_text = ""
                         current_line = 0
                         completed_lines = []
+
+                if scene == 16:
+                    if event.key == pygame.K_y:
+                        coin_yes = True
+                        order = ending
+                        phone_screen = True
+
+
 
         if start == False:
             screen.blit(START_SCREEN, (0,0))
@@ -1551,6 +1591,11 @@ async def main ():
                             draw_text("No", 334, 460)                     
                 elif scene == 16:
                     draw_phonebooth(phone_x=320, phone_y=360)
+                    if character.colliderect(draw_phonebooth(phone_x=320, phone_y=360)):
+                        pygame.draw.rect(screen, BLACK, (200, 400, 200, 100))  
+                        draw_text("Call?", 265, 410) 
+                        draw_text("Yes", 225, 460) 
+                        draw_text("No", 334, 460) 
                     
 
                 # Rope collision
@@ -1718,7 +1763,7 @@ async def main ():
                         if phone_ringing == False:
                             RINGTONE.play(-1)  
                             phone_ringing = True
-                        order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines = phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines) 
+                        order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines, line_x, p = phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines, line_x, ending, p) 
                         if phone_answer != None:
                             RINGTONE.stop()
                             phone_ringing = False
