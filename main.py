@@ -422,66 +422,61 @@ async def main ():
 
 
         if throw_rope == True: 
-            time -= dt
-            jumped = False
+            if touch_rope == False and not keys[pygame.K_SPACE]:
+                time -= dt
+                
 
             if time <= 0:
                 throw_rope = False
                 time = 0
 
             if touch_rope == True and keys[pygame.K_SPACE]:
-                if time <= 0:
-                    y_loc = rope_points[-1][1] + 10
-                    swing = False
-                    throw_rope = False
-                    touch_rope = False
-                    no_move = True
-                    time = 0 
+                time = 5 
+                jumped = False
+
+                x_loc = touch_x
+                y_loc = touch_y
+
+                if keys[pygame.K_RIGHT] or keys[pygame.K_LEFT]:
+                    swing = True 
+                    touch_y = character.centery
+
+                    min_error = float('inf')
+                    pos = 0
+                    for i in range(len(rope_points)):
+                        error = abs(touch_y - rope_points[i][1])
+                        if error < min_error:
+                            min_error = error
+                            pos = i
+                    character.center = (rope_points[pos][0], rope_points[pos][1]) 
+
+                    x_loc = character.x
+                    y_loc = character.y
+
 
                 else:
-                    x_loc = touch_x
-                    y_loc = touch_y
+                    swing = False
 
-                    if keys[pygame.K_RIGHT] or keys[pygame.K_LEFT]:
-                        swing = True 
-                        touch_y = character.centery
-
-                        min_error = float('inf')
-                        pos = 0
-                        for i in range(len(rope_points)):
-                            error = abs(touch_y - rope_points[i][1])
-                            if error < min_error:
-                                min_error = error
-                                pos = i
-                        character.center = (rope_points[pos][0], rope_points[pos][1]) 
-
-                        x_loc = character.x
-                        y_loc = character.y
-
-
-                    else:
+                if swing == False: 
+                    if keys[pygame.K_UP]:
                         swing = False
+                        no_move = False
+                        y_loc -= (PLAYER_SPEED / 2)
 
-                    if swing == False: 
-                        if keys[pygame.K_UP]:
+                        if y_loc < rope_points[0][1] + 5:
+                            y_loc = rope_points[0][1] + 5
+
+                    elif keys[pygame.K_DOWN]:
+                        swing = False
+                        y_loc += (PLAYER_SPEED / 2) 
+
+                        if y_loc > rope_points[-1][1] - 5:
+                            throw_rope = False
+                            touch_rope = False
+                    else:
+                        if no_move == True:
+                            y_loc = touch_y
                             swing = False
-                            no_move = False
-                            y_loc -= (PLAYER_SPEED / 2)
-
-                            if y_loc < rope_points[0][1] + 5:
-                                y_loc = rope_points[0][1] + 5
-
-                        elif keys[pygame.K_DOWN]:
-                            swing = False
-                            y_loc += (PLAYER_SPEED / 2) 
-
-                            if y_loc > rope_points[-1][1] - 5:
-                                throw_rope = False
-                                touch_rope = False
-                        else:
-                            if no_move == True:
-                                y_loc = touch_y
-                                swing = False
 
         else:
             swing = False
