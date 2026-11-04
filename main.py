@@ -132,6 +132,7 @@ async def main ():
         y_snow = random.randint(-SCREEN_HEIGHT, 0)
         snow_speed = random.uniform(1, 3)
         snow.append([x_snow, y_snow, snow_speed])
+    
 
     char_index = 0
     frame_counter = 0
@@ -362,7 +363,7 @@ async def main ():
              
 
 # PLAYER
-    def player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, grounded):
+    def player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys):
         now = pygame.time.get_ticks()
     # Sprite Rendering
 
@@ -371,7 +372,7 @@ async def main ():
             character = player_rotated.get_rect(topleft = (x, y))
             screen.blit(player_rotated, character)
 
-        elif touch_rope == True and grounded == False:
+        elif touch_rope == True and keys[pygame.K_SPACE]:
             character = PLAYER_CLIMB.get_rect(topleft = (x, y)) 
             screen.blit(PLAYER_CLIMB, character)
         elif jumped == True: # or grounded == False:
@@ -634,10 +635,10 @@ async def main ():
 
 
 # SNOW
-    def snowing(snow):
+    def snowing(snow, lives):
 
         for flake in snow:
-            flake[1] += flake[2]
+            flake[1] += (flake[2] + (0.5 * (9 - lives)))
 
             if flake[1] > SCREEN_HEIGHT:
                 flake[1] = random.randint(-50, -10)
@@ -1397,9 +1398,10 @@ async def main ():
                         if start == False:
                             if start_button.collidepoint(mouse_pos):
                                 start = True
-                        elif scene != 0:
+                        elif scene != 0 or scene != 16:
                             if reset_button.collidepoint(mouse_pos):
                                 scene, x, y = reset(scene)
+                                tut_screen = False
                                 for i in range(len(tut_text)):
                                     tut_track[i] = False
                                 if coin_collected == True:
@@ -1408,6 +1410,7 @@ async def main ():
                                 if heart_collected == True:
                                     lives = lose_life(lives) 
                                     heart_collected = False
+                                throw_rope = False
 
                             else: 
                                 SFX_THROW.play()
@@ -1443,6 +1446,7 @@ async def main ():
                         phone_answer = False
                         if scene == 15:
                             ending = 4
+
                 if tut_screen == True:
                     if event.key == pygame.K_RETURN:
                         if throw_rope == True:
@@ -1450,7 +1454,6 @@ async def main ():
                         char_index = 0    
                         frame_counter = 0
                         current_text = ""
-                        
                         tut_screen = False
                 
 
@@ -1501,7 +1504,8 @@ async def main ():
 
                 # Snow
                 if scene > 3:
-                    snowing(snow)
+                    snowing(snow, lives)
+
 
 
                 
@@ -1529,13 +1533,19 @@ async def main ():
                     if tut_screen == True:
                         char_index, frame_counter, current_text = tutorial(tut_text, idx, tut_track, char_index, frame_counter, current_text)
 
-                if scene == 3 and grounded == True and tut_track[7] == False:
-                    idx = 7
+                if scene == 3 and grounded == True and tut_track[6] == False:
+                    char_index = 0    
+                    frame_counter = 0
+                    current_text = ""
+                    idx = 6
                     tut_screen = True
 
-                if scene == 4 and tut_track[8] == False:
-                                idx = 8
-                                tut_screen = True
+                if scene == 4 and tut_track[7] == False:
+                    char_index = 0    
+                    frame_counter = 0
+                    current_text = ""
+                    idx = 7
+                    tut_screen = True
 
 
 
@@ -1550,27 +1560,24 @@ async def main ():
                     y = GROUND - 110
                     respawn = False
 
-                player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, grounded)
-                
-                
 
-            
                 keys = pygame.key.get_pressed()
+
+                player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys)
+                
         
 
             # ROPE
                 if throw_rope == True:
-                    if scene == 1 and tut_track[2] == False:
-                            idx = 2
-                            tut_screen = True
-                    elif scene == 1 and tut_track[3] == False:
+                    if scene <= 2 and tut_track[2] == False:
+                        idx = 2
                         tut_screen = True
-                    elif scene == 1 and tut_track[4] == False:
+                    elif scene <= 2 and tut_track[3] == False:
                         tut_screen = True
                     angle, angle_velocity, x_velocity, y_velocity = rope(rope_points, angle, angle_velocity, swing, x_velocity, y_velocity, keys)
             
             # MOVE      
-                character, animate_time, frame = player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, grounded)  
+                character, animate_time, frame = player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys)  
                 grounded, x, y, swing, jumped, time, throw_rope, no_move, walking_l, walking_r = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r)
                 grounded, x, y, scene, x_velocity, y_velocity, jumped, throw_rope = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope, throw_rope)
 
@@ -1668,9 +1675,6 @@ async def main ():
 
             # Lives
                 if hit_barrier == True:
-                    if scene <= 3 and tut_track[6] == False:
-                        idx = 6
-                        tut_screen = True
                     if life == False: 
                         lives = lose_life(lives)
                         life = True
@@ -1692,17 +1696,24 @@ async def main ():
                         tut_screen = True
                 if scene == 1 and tut_track[1] == False:
                     if character.colliderect(platforms[3]):
+                        char_index = 0    
+                        frame_counter = 0
+                        current_text = ""
                         idx = 1
                         tut_screen = True
-
-                if scene == 2 and tut_track[5] == False:
+                if scene == 2 and tut_track[4] == False:
                     if character.colliderect(platforms[0]) or character.colliderect(platforms[1]):
-                        idx = 5
+                        char_index = 0    
+                        frame_counter = 0
+                        current_text = ""
+                        idx = 4
                         tut_screen = True
-
-                if scene == 2 and tut_track[6] == False:
+                if scene == 2 and tut_track[5] == False:
                     if character.colliderect(platforms[3]):
-                        idx = 6
+                        char_index = 0    
+                        frame_counter = 0
+                        current_text = ""
+                        idx = 5
                         tut_screen = True
 
                 
