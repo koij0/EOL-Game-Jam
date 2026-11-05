@@ -148,7 +148,9 @@ async def main ():
     prev_x = 0
     base_y = 98
     prev_y = base_y
-    
+
+    mood = 0
+
 
 # FILES
     # Phone Story
@@ -310,7 +312,11 @@ async def main ():
         pygame.draw.rect(screen, BLACK, wall2)
         return wall1, wall2
 
-   
+    def darkness(mood):
+            dark = pygame.Surface((600, 800))
+            dark.fill((200-(mood*20), 200-(mood*20), 200-(mood*20)))
+            screen.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_MULT) 
+            return dark
 
 
 # TEXT
@@ -877,6 +883,7 @@ async def main ():
             platforms.append(pygame.Rect(10, 790, 100, 15))
 
             platforms.append(pygame.Rect(260, 790, 150, 15))
+
        
 
         elif scene == 2:
@@ -1201,6 +1208,8 @@ async def main ():
                 pygame.draw.polygon(screen, BLACK, point)
             else: 
                 pygame.draw.rect(screen, BLACK, structure)
+
+
 
         if scene == 16:
             # Rope
@@ -1539,6 +1548,9 @@ async def main ():
                     screen.blit(BG5, (0,0))
                 current_time = pygame.time.get_ticks()
 
+                # Darkness
+                darkness(mood)
+
 
                 # Reset Button
                 reset_button = RESET.get_rect(topleft = (15, 15))
@@ -1793,7 +1805,8 @@ async def main ():
                         
                             break
 
-            
+
+                
 
                 # Coin Count Display
                 count(coin_count)
