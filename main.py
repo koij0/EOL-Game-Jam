@@ -150,6 +150,7 @@ async def main ():
     prev_y = base_y
 
     mood = 0
+    wave_points = []
 
 
 # FILES
@@ -1238,7 +1239,7 @@ async def main ():
 
 # PHONE BOOTH CUT-SCENES
 
-    def phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines, line_x, ending, p, prev_x, prev_y, base_y):
+    def phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines, line_x, ending, p, prev_x, prev_y, base_y, wave_points):
         screen.fill(BLACK)
 
     # Intro 
@@ -1334,7 +1335,8 @@ async def main ():
 
     # CREDITS
         elif order == 6:
-            script = ["Please remain on the line...", 
+            script = ["", 
+                        "-PLEASE REMAIN ON THE LINE-",
                         "",
                         "Design / Code / Music / SFX: Koi", 
                         "Art: ezra_rove, Koi", 
@@ -1346,11 +1348,11 @@ async def main ():
                         "Club 2026 Fall Game Jam",
                         "Theme: 'End of the Line'"] 
             
-            x = [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
+            x = [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
 
             if ending == 4:
                 if line_x < 600:
-                    line_x += 1
+                    line_x += 2
                     pygame.draw.line(screen, GOLD, (0, 98), (line_x, 98), 4)
                 else:
                     line_x = 0
@@ -1358,25 +1360,20 @@ async def main ():
             elif ending == 5:
                 pattern = [0, 1.5, -1.5, 0, 2, -2, 5, -10, 10]
 
-                if line_x == 0:
-                    prev_x = 0
-                    prev_y = base_y
-
-                if p >= len(pattern):
-                    p = 0
-
                 if line_x < 600:
-                    line_x += 20
+                    line_x += 1
+                    p = (line_x // 20) % len(pattern)
                     current_y = base_y + (8 * pattern[p])
-        
-                    pygame.draw.line(screen, GOLD, (prev_x, prev_y), (line_x, current_y), 4)
-                    
-                    prev_x = line_x
-                    prev_y = current_y
-                    p += 1
+
+                    wave_points.append((line_x, current_y))
+                        
 
                 else:
                     line_x = 0
+                    wave_points.clear()
+
+                if len(wave_points) > 1:
+                    pygame.draw.lines(screen, GOLD, False, wave_points, 4)
 
 
         # Type-y Text Effect
@@ -1402,7 +1399,7 @@ async def main ():
             draw_text(current_text, x[current_line], 200 + (current_line * 50))
 
         
-        return order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines, line_x, p, prev_x, prev_y, base_y
+        return order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines, line_x, p, prev_x, prev_y, base_y, wave_points
 
         
 
@@ -1879,7 +1876,7 @@ async def main ():
                         if phone_ringing == False:
                             RINGTONE.play(-1)  
                             phone_ringing = True
-                        order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines, line_x, p, prev_x, prev_y, base_y = phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines, line_x, ending, p, prev_x, prev_y, base_y) 
+                        order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines, line_x, p, prev_x, prev_y, base_y, wave_points = phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines, line_x, ending, p, prev_x, prev_y, base_y, wave_points) 
                         if phone_answer != None:
                             RINGTONE.stop()
                             phone_ringing = False
