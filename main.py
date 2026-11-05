@@ -36,7 +36,7 @@ async def main ():
     GRAVITY = 1
     FALL = 3
     PLAYER_SPEED = 5
-    JUMP_FORCE = -30
+    #JUMP_FORCE = -30
 
 
     # Rope
@@ -87,7 +87,7 @@ async def main ():
     life = False
     respawn = False
 
-    scene = 15 
+    scene = 0
     time = 5
 
     x_rope = 0
@@ -123,6 +123,7 @@ async def main ():
 
     blink = 0
     is_visible = True
+    wire_on = True
 
     phone_ringing = False
 
@@ -418,10 +419,10 @@ async def main ():
                 x_loc += PLAYER_SPEED
                 walking_r = True
             
-            if keys[pygame.K_UP]:
-                y_loc += JUMP_FORCE
-                grounded = False
-                jumped = True    
+          #  if keys[pygame.K_UP]:
+            #    y_loc += JUMP_FORCE
+            #    grounded = False
+             #   jumped = True    
             
 
 
@@ -490,18 +491,13 @@ async def main ():
         
     
 # PHYSICS
-    def physics(x_velocity, y_velocity, x_loc, y_loc, grounded, jumped, scene, touch_rope, throw_rope):
+    def physics(x_velocity, y_velocity, x_loc, y_loc, grounded, jumped, scene, touch_rope, throw_rope, wire_on):
         
         # Gravity
         attached = touch_rope and keys[pygame.K_SPACE]
         if attached == False:
-            if jumped == True:
-                y_velocity += GRAVITY
-                x_velocity *= AIR
-
-            else:   
-                y_velocity = FALL
-                x_velocity = 0
+            y_velocity = FALL
+            x_velocity = 0
 
             y_loc += y_velocity
             x_loc += x_velocity
@@ -533,8 +529,9 @@ async def main ():
             y_loc = 0 
             if scene < 18:
                 scene += 1
+                wire_on = True
                 throw_rope = False
-        return grounded, x_loc, y_loc, scene, x_velocity, y_velocity, jumped, throw_rope
+        return grounded, x_loc, y_loc, scene, x_velocity, y_velocity, jumped, throw_rope, wire_on
 
 
 # ROPE
@@ -997,10 +994,10 @@ async def main ():
             structures.append(pygame.Rect(400, 410, 20, 100))
 
             if not coin_collected: 
-                coin = gen_coin(540, 500)
+                coin = gen_coin(490, 500)
 
             if not heart_collected: 
-                hearts = gen_heart(550, 350)
+                hearts = gen_heart(500, 350)
 
             platforms.append(pygame.Rect(10, 785, 400, 15))
 
@@ -1208,7 +1205,7 @@ async def main ():
             # Ball
             pygame.draw.circle(screen, (229, 185, 11), (int(rope_points[0][0]), int(rope_points[0][1])), 10)            
 
-        return barriers, platforms, structures, coin, hearts
+        return barriers, platforms, structures, coin, hearts, False
 
 
 # PHONE BOOTH CUT-SCENES
@@ -1431,6 +1428,7 @@ async def main ():
                                     lives = lose_life(lives) 
                                     heart_collected = False
                                 throw_rope = False
+                                wire_on = True
 
                             else: 
                                 SFX_THROW.play()
@@ -1539,13 +1537,14 @@ async def main ():
                 if scene > 3:
                     snowing(snow, lives)
 
-
-
-                
-                if current_time >= blink:
-                    is_visible = not is_visible
+                if wire_on == True:
+                    is_visible = True
                     blink = current_time + 4000
-                barriers, platforms, structures, coin, hearts = get_scene(scene, coin_collected, heart_collected, is_visible, None, None, None, None, None)
+                elif wire_on == False:
+                    if current_time >= blink:
+                        is_visible = not is_visible
+                        blink = current_time + 4000
+                barriers, platforms, structures, coin, hearts, wire_on = get_scene(scene, coin_collected, heart_collected, is_visible, None, None, None, None, None)
                 wall1, wall2 = walls()
 
                 if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 16:
@@ -1612,7 +1611,7 @@ async def main ():
             # MOVE      
                 character, animate_time, frame = player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys)  
                 grounded, x, y, swing, jumped, time, throw_rope, no_move, walking_l, walking_r = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r)
-                grounded, x, y, scene, x_velocity, y_velocity, jumped, throw_rope = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope, throw_rope)
+                grounded, x, y, scene, x_velocity, y_velocity, jumped, throw_rope, wire_on = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope, throw_rope, wire_on)
 
                 
 
@@ -1678,10 +1677,6 @@ async def main ():
                 if swing == True:
                     for barrier in barriers:
                         if hit_box.colliderect(barrier[1]):
-                            swing = False
-                            touch_rope = False
-                    for platform in platforms:
-                        if character.colliderect(platform) and grounded == False:
                             swing = False
                             touch_rope = False
 
@@ -1834,6 +1829,7 @@ async def main ():
                             call = None
                             s = 0
                             scene += 1
+                            wire_on = True
                             seq_played = False
                             coin_yes = False
                             phone_answer = None
@@ -1849,6 +1845,7 @@ async def main ():
                 respawn = True
                 coin_collected = False
                 heart_collected = False
+                wire_on = True
 
 
 
