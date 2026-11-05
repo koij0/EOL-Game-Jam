@@ -1,8 +1,8 @@
-Use ARROW KEYS to MOVE and JUMP
+Use ARROW KEYS to MOVE
 To use ROPE click with MOUSE
-To hold onto ROPE hold the SPACE
-Use ARROW KEYS to CLIMB and SWING
+Hold SPACE to grab ROPE
+Use ARROW KEYS to CLIMB & SWING
 Collect COINS!
-Hold ROPE and use the MOUSE to move the ROPE to CLIMB!
+Grab ROPE & reposition with MOUSE to CLIMB
 There's a PHONE...
 Be careful of WIRES...you will lose a LIFE!

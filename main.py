@@ -208,7 +208,13 @@ async def main ():
     BG5 = pygame.image.load("backgrounds/background5.png").convert_alpha()
     BG5 = pygame.transform.scale(BG5, (SCREEN_WIDTH, SCREEN_HEIGHT))
     
-    
+    # CHAT BOX - For Tutorial
+    CHATBOX = pygame.image.load("sprites/chatbox.png").convert_alpha()
+    CHATBOX = pygame.transform.scale(CHATBOX, (350, 230))
+
+    # COIN SLOT
+    COINSLOT = pygame.image.load("sprites/coinslot.png").convert_alpha()
+    COINSLOT = pygame.transform.scale(COINSLOT, (220, 150))
 
     # Player
     PLAYER_IDLE = pygame.image.load("sprites/idle.png").convert_alpha()
@@ -334,8 +340,7 @@ async def main ():
 
 # TUTORIAL
     def tutorial(tut_text, idx, tut_track, char_index, frame_counter, current_text):
-        pygame.draw.rect(screen, BLACK, (150, 300, 300, 170))  
-       # wrap(screen, tut_text[idx], font, WHITE, 160, 320, 75)
+        screen.blit(CHATBOX, (120, 260))
         if idx < len(tut_text):
             target_text = tut_text[idx]
             
@@ -347,9 +352,9 @@ async def main ():
                     current_text = target_text[:char_index]
                         
         if current_text != "" and idx < len(tut_text):
-            wrap(screen, current_text, font, WHITE, 160, 320, 75)
+            wrap(screen, current_text, font, TEAL, 165, 325, 65)
         
-        draw_text("RETURN", 250, 430) 
+        draw_text("RETURN", 250, 450) 
         tut_track[idx] = True
 
         return char_index, frame_counter, current_text
@@ -1506,7 +1511,7 @@ async def main ():
                         tut_screen = False
                 
 
-                if scene == 0:
+                if scene == 0 and start == True:
                     if event.key == pygame.K_RETURN:
                         scene = 1
                         char_index = 0
@@ -1631,10 +1636,11 @@ async def main ():
                         tut_screen = True
                     angle, angle_velocity, x_velocity, y_velocity = rope(rope_points, angle, angle_velocity, swing, x_velocity, y_velocity, keys)
             
-            # MOVE      
-                character, animate_time, frame = player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys, idle)  
-                grounded, x, y, swing, jumped, time, throw_rope, no_move, walking_l, walking_r, idle = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r, idle)
-                grounded, x, y, scene, x_velocity, y_velocity, jumped, throw_rope, wire_on = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope, throw_rope, wire_on)
+            # MOVE 
+                if tut_screen != True:     
+                    character, animate_time, frame = player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys, idle)  
+                    grounded, x, y, swing, jumped, time, throw_rope, no_move, walking_l, walking_r, idle = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r, idle)
+                    grounded, x, y, scene, x_velocity, y_velocity, jumped, throw_rope, wire_on = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope, throw_rope, wire_on)
 
                 
 
@@ -1660,17 +1666,17 @@ async def main ():
                     draw_phonebooth(phone_x=480, phone_y=GROUND - 130)
                     if coin_count > 0:        
                         if character.colliderect(draw_phonebooth(phone_x=480, phone_y=GROUND - 130)):
-                            pygame.draw.rect(screen, BLACK, (200, 400, 200, 100))  
+                            screen.blit(COINSLOT, (190, 350))  
                             draw_text("Use Coin?", 235, 410) 
-                            draw_text("Yes", 225, 460) 
-                            draw_text("No", 334, 460)                     
+                            draw_text("Yes", 225, 466) 
+                            draw_text("No", 334, 466)                     
                 elif scene == 16:
                     draw_phonebooth(phone_x=320, phone_y=360)
                     if character.colliderect(draw_phonebooth(phone_x=320, phone_y=360)):
-                        pygame.draw.rect(screen, BLACK, (200, 400, 200, 100))  
+                        screen.blit(COINSLOT, (190, 350))  
                         draw_text("Call?", 265, 410) 
-                        draw_text("Yes", 225, 460) 
-                        draw_text("No", 334, 460) 
+                        draw_text("Yes", 225, 466) 
+                        draw_text("No", 334, 466) 
                     
 
                 # Rope collision
