@@ -296,6 +296,8 @@ async def main ():
     SFX_USE_COIN = pygame.mixer.Sound("sfx/use_coin.wav")
     SFX_BEEP = pygame.mixer.Sound("sfx/beep.wav")
     SFX_CLICK = pygame.mixer.Sound("sfx/click.wav")
+    SFX_GET_LIFE = pygame.mixer.Sound("sfx/get_life.wav")
+    SFX_LOSE_LIFE = pygame.mixer.Sound("sfx/lose_life.wav")
 
 
     
@@ -712,11 +714,13 @@ async def main ():
     
     # Collect
     def get_heart(lives):
+        SFX_GET_LIFE.play()
         lives += 1
         return lives
     
     # Lose
     def lose_life(lives):
+        SFX_LOSE_LIFE.play()
         lives -= 1
         return lives
 
