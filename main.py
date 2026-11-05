@@ -69,6 +69,7 @@ async def main ():
     jumped = False
     walking_l = False
     walking_r = False
+    idle = True     # True will be Right-facing
 
     frame = 0
 
@@ -367,7 +368,7 @@ async def main ():
              
 
 # PLAYER
-    def player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys):
+    def player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys, idle):
         now = pygame.time.get_ticks()
     # Sprite Rendering
 
@@ -398,15 +399,22 @@ async def main ():
             character = walk.get_rect(topleft = (x, y)) 
             screen.blit(walk, character)
         
-        else:
+        elif idle == True:
             character = PLAYER_IDLE.get_rect(topleft = (x, y)) 
             screen.blit(PLAYER_IDLE, character)
             frame = 0
+
+        elif idle == False:
+            player_idle_l = pygame.transform.flip(PLAYER_IDLE, True, False)
+            character = player_idle_l.get_rect(topleft = (x, y)) 
+            screen.blit(player_idle_l, character)
+            frame = 0
+
         return character, animate_time, frame
 
 
 # MOVEMENT
-    def player_move(x_loc, y_loc, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r):
+    def player_move(x_loc, y_loc, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r, idle):
         walking_l = False
         walking_r = False
 
@@ -414,10 +422,11 @@ async def main ():
             if keys[pygame.K_LEFT]:
                 x_loc -= PLAYER_SPEED
                 walking_l = True
-                
+                idle = False
             if keys[pygame.K_RIGHT]:
                 x_loc += PLAYER_SPEED
                 walking_r = True
+                idle = True
             
           #  if keys[pygame.K_UP]:
             #    y_loc += JUMP_FORCE
@@ -486,7 +495,7 @@ async def main ():
         else:
             swing = False
 
-        return grounded, x_loc, y_loc, swing, jumped, time, throw_rope, no_move, walking_l, walking_r
+        return grounded, x_loc, y_loc, swing, jumped, time, throw_rope, no_move, walking_l, walking_r, idle
         
         
     
@@ -1429,6 +1438,7 @@ async def main ():
                                     heart_collected = False
                                 throw_rope = False
                                 wire_on = True
+                                idle = True
 
                             else: 
                                 SFX_THROW.play()
@@ -1595,7 +1605,7 @@ async def main ():
 
                 keys = pygame.key.get_pressed()
 
-                player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys)
+                player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys, idle)
                 
         
 
@@ -1609,8 +1619,8 @@ async def main ():
                     angle, angle_velocity, x_velocity, y_velocity = rope(rope_points, angle, angle_velocity, swing, x_velocity, y_velocity, keys)
             
             # MOVE      
-                character, animate_time, frame = player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys)  
-                grounded, x, y, swing, jumped, time, throw_rope, no_move, walking_l, walking_r = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r)
+                character, animate_time, frame = player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys, idle)  
+                grounded, x, y, swing, jumped, time, throw_rope, no_move, walking_l, walking_r, idle = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r, idle)
                 grounded, x, y, scene, x_velocity, y_velocity, jumped, throw_rope, wire_on = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope, throw_rope, wire_on)
 
                 
@@ -1830,6 +1840,7 @@ async def main ():
                             s = 0
                             scene += 1
                             wire_on = True
+                            idle = True
                             seq_played = False
                             coin_yes = False
                             phone_answer = None
