@@ -74,7 +74,7 @@ async def main ():
     frame = 0
 
     tut_track = []
-    tut_screen = True
+    tut_screen = False # CHEAT
     idx = 0
 
     coin_count = 1
@@ -88,7 +88,7 @@ async def main ():
     life = False
     respawn = False
 
-    scene = 0
+    scene = 15
     time = 5
 
     x_rope = 0
@@ -837,7 +837,7 @@ async def main ():
 
 
 # LEVEL / SCENES
-    def get_scene(scene, coin_collected, heart_collected, is_visible, char_index, frame_counter, current_text, current_line, completed_lines):
+    def get_scene(scene, coin_collected, heart_collected, is_visible, char_index, frame_counter, current_text, current_line, completed_lines, order):
         barriers = []
         off_barriers = []
         platforms = []
@@ -970,9 +970,14 @@ async def main ():
 
 
             
-        elif scene == 7: ### EDIT -- add more?
+        elif scene == 7: 
             barriers.append([pygame.transform.scale(WIRE2, (200, 60)), (pygame.transform.scale(WIRE2, (200, 60))).get_rect(topleft = (10, 300))]) 
-            structures.append(pygame.Rect(205, 320, 30, 330)) 
+            barriers.append([pygame.transform.scale(WIRE2, (200, 60)), (pygame.transform.scale(WIRE2, (200, 60))).get_rect(topleft = (390, 300))]) 
+
+            structures.append(pygame.Rect(205, 0, 30, 330)) 
+            structures.append(pygame.Rect(495, 0, 30, 330)) 
+
+            
 
         # 2 - 
 
@@ -1190,9 +1195,9 @@ async def main ():
 
             for i in range(SEGMENTS):
                 rope_points.append([x_rope, y_rope + i * SEGMENT_LENGTH, x_rope, y_rope + i * SEGMENT_LENGTH])      
-                if i > 0:
-                    rope_points[i][0] += random.uniform(-5, 5)
-
+                
+            
+                
             rope_points[0][0] = x_rope
             rope_points[0][1] = y_rope   
                  
@@ -1215,8 +1220,7 @@ async def main ():
                 pygame.draw.rect(screen, BLACK, structure)
 
 
-
-        if scene == 16:
+        if scene == 16 and order == 4:
             # Rope
             for i in range(len(rope_points) - 1):
                 p1 = (int(rope_points[i][0]), int(rope_points[i][1]))
@@ -1333,7 +1337,7 @@ async def main ():
             script = ["Please remain on the line...", 
                         "",
                         "Design / Code / Music / SFX: Koi", 
-                        "Art: ezra_rove", 
+                        "Art: ezra_rove, Koi", 
                         "Play Testers: Roomies", 
                         "Built with: Python 3.12 - Pygame", 
                         "Font: 'Nokia Cellphone FC'", 
@@ -1439,7 +1443,7 @@ async def main ():
                         if start == False:
                             if start_button.collidepoint(mouse_pos):
                                 start = True
-                        elif scene != 0 or scene != 16:
+                        elif scene != 0 and scene != 16:
                             if reset_button.collidepoint(mouse_pos):
                                 scene, x, y = reset(scene)
                                 tut_screen = False
@@ -1473,7 +1477,15 @@ async def main ():
                                 time = 5
 
             if event.type == pygame.KEYDOWN:
-                if coin_yes == None:
+                if scene == 16:
+                    if event.key == pygame.K_y:
+                        coin_yes = True
+                        order = ending
+                        phone_screen = True
+                    elif event.key == pygame.K_n:
+                        x = 200
+
+                elif coin_yes == None:
                     if event.key == pygame.K_y:
                         coin_yes = True
                         tut_screen = False
@@ -1490,13 +1502,17 @@ async def main ():
                         if scene == 15:
                             ending = 4
 
-                    if order == 4 or order == 5:
-                        if event.key == pygame.K_RETURN:
-                            char_index = 0    
-                            frame_counter = 0
-                            current_text = ""
-                            completed_lines = []
-                            current_line = 0
+                if order == 4 or order == 5:
+                    if event.key == pygame.K_RETURN:
+                        char_index = 0    
+                        frame_counter = 0
+                        current_text = ""
+                        completed_lines = []
+                        current_line = 0
+                        if ending == 4:
+                            coin_yes = None
+                            scene = 16
+                        else: 
                             order = 6
                             
                         
@@ -1520,11 +1536,7 @@ async def main ():
                         current_line = 0
                         completed_lines = []
 
-                if scene == 16:
-                    if event.key == pygame.K_y:
-                        coin_yes = True
-                        order = ending
-                        phone_screen = True
+                
 
                  
 
@@ -1536,7 +1548,7 @@ async def main ():
             pygame.draw.rect(screen, (0, 117, 180), start_button)
             draw_text("START", 255, 660, color=WHITE)
         elif scene == 0: 
-            current_line, char_index, frame_counter, current_text, completed_lines = get_scene(scene, None, None, None, char_index, frame_counter, current_text, current_line, completed_lines)
+            current_line, char_index, frame_counter, current_text, completed_lines = get_scene(scene, None, None, None, char_index, frame_counter, current_text, current_line, completed_lines, None)
         elif start == True: 
             if coin_yes == None:
                 if scene == 1:
@@ -1572,7 +1584,7 @@ async def main ():
                     if current_time >= blink:
                         is_visible = not is_visible
                         blink = current_time + 4000
-                barriers, platforms, structures, coin, hearts, wire_on = get_scene(scene, coin_collected, heart_collected, is_visible, None, None, None, None, None)
+                barriers, platforms, structures, coin, hearts, wire_on = get_scene(scene, coin_collected, heart_collected, is_visible, None, None, None, None, None, order)
                 wall1, wall2 = walls()
 
                 if scene == 3 or scene == 7 or scene == 11 or scene == 15 or scene == 16:
@@ -1670,7 +1682,7 @@ async def main ():
                             draw_text("Use Coin?", 235, 410) 
                             draw_text("Yes", 225, 466) 
                             draw_text("No", 334, 466)                     
-                elif scene == 16:
+                elif scene == 16 and order < 4:
                     draw_phonebooth(phone_x=320, phone_y=360)
                     if character.colliderect(draw_phonebooth(phone_x=320, phone_y=360)):
                         screen.blit(COINSLOT, (190, 350))  
@@ -1702,6 +1714,20 @@ async def main ():
                     swing = False
                     touch_rope = False
 
+
+                # END ROPE COLLISION
+                if scene == 16 and order == 4:
+                    detection = character.inflate(30, 30)
+                    start_point = (475, 295)
+                    end_point = (475, 295 + (SEGMENTS * SEGMENT_LENGTH))
+
+                    if detection.clipline(start_point, end_point):
+                            x = 435 
+                            y = 295 + ((SEGMENTS-2) * SEGMENT_LENGTH)
+                           # coin_yes = True
+                          #  order = 6
+
+
                 # Swinging Collisions
                 if swing == True:
                     for barrier in barriers:
@@ -1713,11 +1739,12 @@ async def main ():
                         swing = False
                         touch_rope = False
 
-                    for structure in structures:
-                        if not isinstance(structure, Polygon):    
-                            if character.colliderect(structure):
-                                swing = False
-                                touch_rope = False
+                    if scene == 2 or scene == 7:
+                        for structure in structures:
+                            if not isinstance(structure, Polygon):    
+                                if character.colliderect(structure):
+                                    swing = False
+                                    touch_rope = False
 
 
 
