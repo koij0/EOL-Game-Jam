@@ -491,7 +491,8 @@ async def main ():
                         if no_move == True:
                             y_loc = touch_y
                             swing = False
-
+            else:
+                swing = False
         else:
             swing = False
 
