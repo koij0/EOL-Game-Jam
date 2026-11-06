@@ -88,7 +88,7 @@ async def main ():
     life = False
     respawn = False
 
-    scene = 0
+    scene = 16
     time = 5
 
     x_rope = 0
@@ -152,8 +152,9 @@ async def main ():
     mood = 0
     wave_points = []
 
-    end = True
+    end = False
     move_end = 0
+    credits = False
 
 
 # FILES
@@ -1256,7 +1257,7 @@ async def main ():
 
 # PHONE BOOTH CUT-SCENES
 
-    def phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines, line_x, ending, p, prev_x, prev_y, base_y, wave_points):
+    def phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines):
         screen.fill(BLACK)
 
     # Intro 
@@ -1348,49 +1349,6 @@ async def main ():
             x = [20, 20, 20, 20, 20, 20]
 
             draw_text("RETURN", 243, 600) 
-            
-
-    # CREDITS
-        elif order == 6:
-            script = ["", 
-                        "-PLEASE REMAIN ON THE LINE-",
-                        "",
-                        "Design / Code / Music / SFX: Koi", 
-                        "Art: ezra_rove, Koi", 
-                        "Play Testers: Roomies", 
-                        "Built with: Python 3.12 - Pygame", 
-                        "Font: 'Nokia Cellphone FC'", 
-                        "by Zeh Fernando", 
-                        "Made for: Mines Game Development",
-                        "Club 2026 Fall Game Jam",
-                        "Theme: 'End of the Line'"] 
-            
-            x = [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
-
-            if ending == 4:
-                if line_x < 600:
-                    line_x += 2
-                    pygame.draw.line(screen, GOLD, (0, 98), (line_x, 98), 4)
-                else:
-                    line_x = 0
-
-            elif ending == 5:
-                pattern = [0, 1.5, -1.5, 0, 2, -2, 5, -10, 10]
-
-                if line_x < 600:
-                    line_x += 1
-                    p = (line_x // 20) % len(pattern)
-                    current_y = base_y + (8 * pattern[p])
-
-                    wave_points.append((line_x, current_y))
-                        
-
-                else:
-                    line_x = 0
-                    wave_points.clear()
-
-                if len(wave_points) > 1:
-                    pygame.draw.lines(screen, GOLD, False, wave_points, 4)
 
 
         # Type-y Text Effect
@@ -1416,7 +1374,7 @@ async def main ():
             draw_text(current_text, x[current_line], 200 + (current_line * 50))
 
         
-        return order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines, line_x, p, prev_x, prev_y, base_y, wave_points
+        return order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines
 
         
 
@@ -1429,13 +1387,7 @@ async def main ():
         rope_points[0][0] = x_rope
         rope_points[0][1] = y_rope
         rope_points[0][2] = x_rope
-        rope_points[0][3] = y_rope
-
-        # Hit box
-        hit_box = pygame.Rect(x + 20, y + 20, 80, 60)
-
-
-                            
+        rope_points[0][3] = y_rope                    
 
 # Check Events
         for event in pygame.event.get():
@@ -1527,7 +1479,9 @@ async def main ():
                             coin_yes = None
                             scene = 16
                         else: 
-                            order = 6
+                            start = None
+                            credits = True
+                            
                             
                         
 
@@ -1574,6 +1528,18 @@ async def main ():
                         current_text = ""
                         current_line = 0
                         completed_lines = []
+
+                if end == True:
+                    if event.key == pygame.K_RETURN:
+                        end = False
+                        char_index = 0
+                        frame_counter = 0
+                        current_text = ""
+                        current_line = 0
+                        completed_lines = []
+                        start = None
+                        credits = True
+                        
 
                 
 
@@ -1767,13 +1733,15 @@ async def main ():
                     if detection.clipline(start_point, end_point):
                             x = 435 
                             y = 295 + ((SEGMENTS-2) * SEGMENT_LENGTH)
+                            start = None
                             end = True
 
-                           # coin_yes = True
-                          #  order = 6
+                    
 
 
                 # Swinging Collisions
+                # Hit box
+                hit_box = pygame.Rect(x + 20, y + 20, 80, 60)
                 if swing == True:
                     for barrier in barriers:
                         if hit_box.colliderect(barrier[1]):
@@ -1819,6 +1787,7 @@ async def main ():
             # Check Lives / GAME OVER
                 if lives <= 0:
                     start = None
+                    credits = True
                 
 
 
@@ -1966,23 +1935,93 @@ async def main ():
                 x = 390
                 coin_yes = None
 
-        else:
-            screen.fill(BLACK)
-            draw_text("GAME OVER", 230, 400)
-
-
 
         # Ending
         if end == True:
-            end_scene = [""]
+            end_scene = ["Hello. This is the Suicide & Crisis Lifeline.                       ", 
+                         "We were speaking earlier and got disconnected.                       ", 
+                         "Please feel free to call back at 800-273-8255.                       ", 
+                         "We are here for you.                              "]
             screen.fill(BLACK)
+
             frame_counter += 1
             if frame_counter >= 5:
                 frame_counter = 0  
                 move_end += 1
-            if current_line < len(end_scene):
-                target_text = end_scene[current_line]
 
+            if move_end > 80:
+                move_end = 80
+            screen.blit(BAD_END, (0, -SCREEN_HEIGHT + (10 * move_end)))
+
+            if move_end >= 70:
+                if current_line < len(end_scene):
+                    target_text = end_scene[current_line]
+
+                    if char_index < len(target_text):
+                        frame_counter += 1
+                        if frame_counter >= 5:
+                            frame_counter = 0  
+                            char_index += 1    
+                            current_text = target_text[:char_index]
+                    else: 
+                        current_line += 1
+                        char_index = 0
+                        current_text = ""            
+                
+                if current_text != "" and current_line < len(end_scene):
+                    wrap(screen, current_text, font, WHITE, 185, 375, 70)    
+                elif current_line == len(end_scene):
+                    draw_text("RETURN", 250, 420)    
+
+
+
+    # CREDITS
+        if credits == True:
+            screen.fill(BLACK)
+            script = ["", 
+                        "-PLEASE REMAIN ON THE LINE-",
+                        "",
+                        "Design / Code / Music / SFX: Koi", 
+                        "Art: ezra_rove, Koi", 
+                        "Play Testers: Roomies", 
+                        "Built with: Python 3.12 - Pygame", 
+                        "Font: 'Nokia Cellphone FC'", 
+                        "by Zeh Fernando", 
+                        "Made for: Mines Game Development",
+                        "Club 2026 Fall Game Jam",
+                        "Theme: 'End of the Line'"] 
+            
+            x = [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
+
+            if ending == 4 or lives == 0:
+                if line_x < 600:
+                    line_x += 2
+                    pygame.draw.line(screen, GOLD, (0, 98), (line_x, 98), 4)
+                else:
+                    line_x = 0
+
+            elif ending == 5:
+                pattern = [0, 1.5, -1.5, 0, 2, -2, 5, -10, 10]
+
+                if line_x < 600:
+                    line_x += 1
+                    p = (line_x // 20) % len(pattern)
+                    current_y = base_y + (8 * pattern[p])
+
+                    wave_points.append((line_x, current_y))
+                        
+
+                else:
+                    line_x = 0
+                    wave_points.clear()
+
+                if len(wave_points) > 1:
+                    pygame.draw.lines(screen, GOLD, False, wave_points, 4)
+
+
+            if current_line < len(script):
+                target_text = script[current_line]
+            
                 if char_index < len(target_text):
                     frame_counter += 1
                     if frame_counter >= 5:
@@ -1994,16 +2033,12 @@ async def main ():
                     current_line += 1
                     char_index = 0
                     current_text = ""
-
+            
             for i in range(len(completed_lines)):
-                draw_text(completed_lines[i], 20, 20 + (i * 80))
-
-            if current_text != "" and current_line < len(end_scene):
-                draw_text(current_text, 20, 20 + (current_line * 80))
-            print(move_end)
-            if move_end > 16:
-                move_end = 16
-            screen.blit(BAD_END, (0, -SCREEN_HEIGHT + (50 * move_end)))
+                draw_text(completed_lines[i], x[i], 200 + (i * 50))
+                    
+            if current_text != "" and current_line < len(script):
+                draw_text(current_text, x[current_line], 200 + (current_line * 50))
             
             
         pygame.display.flip()
