@@ -152,7 +152,7 @@ async def main ():
     mood = 0
     wave_points = []
 
-    end = False
+    end = None
     move_end = 0
     credits = False
     rising_sun = 0
@@ -213,6 +213,9 @@ async def main ():
 
     BG5 = pygame.image.load("backgrounds/background5.png").convert_alpha()
     BG5 = pygame.transform.scale(BG5, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    PHONE_BG = pygame.image.load("backgrounds/phone_bg.png").convert_alpha()
+    PHONE_BG = pygame.transform.scale(PHONE_BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
     # Ending
 
@@ -873,10 +876,14 @@ async def main ():
     # 0 - Phone Call / Home 
 
         if scene == 0: 
-            screen.fill(BLACK)
+            screen.blit(PHONE_BG, (0,0))
 
             # MAKE TYPE-Y
-            call_scene = ["Hello?", "How can I help you?", "Hello?", "Are you there?", "Hello...?", ] 
+            call_scene = ["Hello?                  ", 
+                            "How can I help you?                  ",
+                            "Hello?                  ", 
+                            "Are you there?                  ",
+                            "Hello...?                  ", ] 
 
             if current_line < len(call_scene):
                 target_text = call_scene[current_line]
@@ -888,18 +895,16 @@ async def main ():
                         char_index += 1    
                         current_text = target_text[:char_index]
                 else: 
-                    completed_lines.append(target_text)
                     current_line += 1
                     char_index = 0
-                    current_text = ""
-
-            for i in range(len(completed_lines)):
-                draw_text(completed_lines[i], 20, 20 + (i * 80))
-
+                    current_text = ""            
+                
             if current_text != "" and current_line < len(call_scene):
-                draw_text(current_text, 20, 20 + (current_line * 80))
+                wrap(screen, current_text, font, WHITE, 250, 350, 70)    
 
-            draw_text("HIT RETURN", 20, 600)
+            elif current_line == len(call_scene):
+                draw_text("DISCONNECTED:", 250, 325)
+                wrap(screen, "Press RETURN on Keyboard.", font, WHITE, 250, 375, 50)
 
             return current_line, char_index, frame_counter, current_text, completed_lines
             
@@ -1265,12 +1270,11 @@ async def main ():
 # PHONE BOOTH CUT-SCENES
 
     def phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines):
-        screen.fill(BLACK)
+        screen.blit(PHONE_BG, (0, 0))
 
     # Intro 
         if order == 0: 
-            script = [phone_script[0], phone_script[1]]
-            x = [100, 100]
+            script = [phone_script[0]]
             draw_text("Yes", 225, 600) 
             draw_text("No", 334, 600)
 
@@ -1284,8 +1288,7 @@ async def main ():
             
     # 1 - “Have you had thoughts about how you might do this?” 
         elif order == 1: 
-            script = [phone_script[2], phone_script[3]]
-            x = [130, 80]
+            script = [phone_script[1]]
             draw_text("Yes", 225, 600) 
             draw_text("No", 334, 600) 
             if phone_answer != None:
@@ -1302,8 +1305,7 @@ async def main ():
                 
     # 2 - “Are you safe?”
         elif order == 2: 
-            script = [phone_script[4]]
-            x = [200]
+            script = [phone_script[2]]
             draw_text("Yes", 225, 600) 
             draw_text("No", 334, 600) 
             if phone_answer != None:
@@ -1319,43 +1321,40 @@ async def main ():
                 
     # 3 - “Do you need help?”
         elif order == 3: 
-            script = [phone_script[5]]
-            x = [180]
+            script = [phone_script[3]]
             draw_text("Yes", 225, 600) 
             draw_text("No", 334, 600) 
             if phone_answer != None:
-                order = 4
                 char_index = 0
                 frame_counter = 0
                 current_text = ""
                 current_line = 0
                 completed_lines = []
+                if phone_answer == True:
+                    order = 5 
+                elif phone_answer == False:
+                    order = 4
 
-            if phone_answer == False:
-                lives = lose_life(lives)
+            
                 
     # 4 - Ending
 
     # BAD Ending 
         elif order == 4: 
-            script = [phone_script[6]]
-            x = [30]
+            script = [phone_script[4]]
 
-            draw_text("RETURN", 243, 600) 
+            draw_text("RETURN", 250, 480) 
             
 
     # GOOD Ending 
         elif order == 5:
-            script = ["Connecting...",
-                        "",
-                        "Hello?", 
-                        "This is the Suicide & Crisis Lifeline.", 
-                        "",
+            script = ["Connecting...                ",
+                        "Hello?                ", 
+                        "This is the Suicide & Crisis Lifeline.                ", 
                         "Thank you for Remaining on the Line."]
     
-            x = [20, 20, 20, 20, 20, 20]
 
-            draw_text("RETURN", 243, 600) 
+            draw_text("RETURN", 250, 480) 
 
 
         # Type-y Text Effect
@@ -1369,16 +1368,16 @@ async def main ():
                     char_index += 1    
                     current_text = target_text[:char_index]
             else: 
-                completed_lines.append(target_text)
                 current_line += 1
                 char_index = 0
-                current_text = ""
-        
-        for i in range(len(completed_lines)):
-            draw_text(completed_lines[i], x[i], 200 + (i * 50))
-                
+                current_text = ""            
+                        
         if current_text != "" and current_line < len(script):
-            draw_text(current_text, x[current_line], 200 + (current_line * 50))
+            wrap(screen, current_text, font, WHITE, 250, 350, 70)  
+        elif current_line == len(script):
+            wrap(screen, script[-1], font, WHITE, 250, 350, 70)
+        
+        
 
         
         return order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines
@@ -1450,7 +1449,41 @@ async def main ():
                                 time = 5
 
             if event.type == pygame.KEYDOWN:
-                if scene == 16:
+                if order == 4 and end == None:
+                    if event.key == pygame.K_RETURN:
+                        char_index = 0    
+                        frame_counter = 0
+                        current_text = ""
+                        completed_lines = []
+                        current_line = 0
+                        
+                        coin_yes = None
+                        scene = 16
+                        
+                            
+                elif order == 5 and end == None:
+                    if event.key == pygame.K_RETURN:
+                        char_index = 0    
+                        frame_counter = 0
+                        current_text = ""
+                        completed_lines = []
+                        current_line = 0    
+
+                        start = None
+                        end = False 
+
+                elif end != None:
+                    if event.key == pygame.K_RETURN:
+                        end = None
+                        char_index = 0
+                        frame_counter = 0
+                        current_text = ""
+                        current_line = 0
+                        completed_lines = []
+                        start = None
+                        credits = True            
+
+                elif scene == 16:
                     if event.key == pygame.K_y:
                         coin_yes = True
                         order = ending
@@ -1475,19 +1508,7 @@ async def main ():
                         if scene == 15:
                             ending = 4
 
-                if order == 4 or order == 5:
-                    if event.key == pygame.K_RETURN:
-                        char_index = 0    
-                        frame_counter = 0
-                        current_text = ""
-                        completed_lines = []
-                        current_line = 0
-                        if ending == 4:
-                            coin_yes = None
-                            scene = 16
-                        else: 
-                            start = None
-                            end = False
+                
                             
                             
                         
@@ -1536,16 +1557,7 @@ async def main ():
                         current_line = 0
                         completed_lines = []
 
-                if end != None:
-                    if event.key == pygame.K_RETURN:
-                        end = None
-                        char_index = 0
-                        frame_counter = 0
-                        current_text = ""
-                        current_line = 0
-                        completed_lines = []
-                        start = None
-                        credits = True
+                
                         
 
                 
@@ -1559,9 +1571,11 @@ async def main ():
             start_button = pygame.Rect(150, 625, 300, 100)
             pygame.draw.rect(screen, (0, 117, 180), start_button)
             draw_text("START", 255, 660, color=WHITE)
+
         elif scene == 0: 
             current_line, char_index, frame_counter, current_text, completed_lines = get_scene(scene, None, None, None, char_index, frame_counter, current_text, current_line, completed_lines, None)
-        elif start == True: 
+        
+        elif start == True and end == None and credits == False: 
             if coin_yes == None:
                 if scene == 1:
                     screen.blit(BH1, (0,0))
@@ -2037,7 +2051,7 @@ async def main ():
                         "",
                         "Design / Code / Music / SFX: Koi", 
                         "Art: ezra_rove, Koi", 
-                        "Play Testers: Roomies", 
+                        "Play Testers: Roomies, Benton, James", 
                         "Built with: Python 3.12 - Pygame", 
                         "Font: 'Nokia Cellphone FC'", 
                         "by Zeh Fernando", 
