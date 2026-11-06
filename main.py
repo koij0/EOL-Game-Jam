@@ -88,7 +88,7 @@ async def main ():
     life = False
     respawn = False
 
-    scene = 15
+    scene = 0
     time = 5
 
     x_rope = 0
@@ -152,6 +152,9 @@ async def main ():
     mood = 0
     wave_points = []
 
+    end = True
+    move_end = 0
+
 
 # FILES
     # Phone Story
@@ -208,6 +211,11 @@ async def main ():
 
     BG5 = pygame.image.load("backgrounds/background5.png").convert_alpha()
     BG5 = pygame.transform.scale(BG5, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    # Ending
+
+    BAD_END = pygame.image.load("backgrounds/bad_end.png").convert_alpha()
+    BAD_END = pygame.transform.scale(BAD_END, (SCREEN_WIDTH, SCREEN_HEIGHT))
     
     # CHAT BOX - For Tutorial
     CHATBOX = pygame.image.load("sprites/chatbox.png").convert_alpha()
@@ -323,7 +331,7 @@ async def main ():
 
     def darkness(mood):
             dark = pygame.Surface((600, 800))
-            dark.fill((200-(mood*20), 200-(mood*20), 200-(mood*20)))
+            dark.fill((200-(mood*10), 200-(mood*10), 200-(mood*10)))
             screen.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_MULT) 
             return dark
 
@@ -390,10 +398,12 @@ async def main ():
             player_rotated = pygame.transform.rotate(PLAYER_CLIMB, math.degrees(angle))
             character = player_rotated.get_rect(topleft = (x, y))
             screen.blit(player_rotated, character)
+            sprite = player_rotated
 
         elif touch_rope == True and keys[pygame.K_SPACE]:
             character = PLAYER_CLIMB.get_rect(topleft = (x, y)) 
             screen.blit(PLAYER_CLIMB, character)
+            sprite = PLAYER_CLIMB
         elif jumped == True: # or grounded == False:
           #  SFX_JUMP.play()
             character = PLAYER_JUMP.get_rect(topleft = (x, y)) 
@@ -412,19 +422,22 @@ async def main ():
 
             character = walk.get_rect(topleft = (x, y)) 
             screen.blit(walk, character)
+            sprite = walk
         
         elif idle == True:
             character = PLAYER_IDLE.get_rect(topleft = (x, y)) 
             screen.blit(PLAYER_IDLE, character)
             frame = 0
+            sprite = PLAYER_IDLE
 
         elif idle == False:
             player_idle_l = pygame.transform.flip(PLAYER_IDLE, True, False)
             character = player_idle_l.get_rect(topleft = (x, y)) 
             screen.blit(player_idle_l, character)
             frame = 0
+            sprite = player_idle_l
 
-        return character, animate_time, frame
+        return character, animate_time, frame, sprite
 
 
 # MOVEMENT
@@ -980,7 +993,7 @@ async def main ():
             barriers.append([pygame.transform.scale(WIRE2, (200, 60)), (pygame.transform.scale(WIRE2, (200, 60))).get_rect(topleft = (390, 300))]) 
 
             structures.append(pygame.Rect(205, 0, 30, 330)) 
-            structures.append(pygame.Rect(495, 0, 30, 330)) 
+            structures.append(pygame.Rect(395, 0, 30, 330)) 
 
             
 
@@ -1454,7 +1467,7 @@ async def main ():
                                     coin_count -= 1        
                                     coin_collected = False
                                 if heart_collected == True:
-                                    lives = lose_life(lives) 
+                                    lives -= lives 
                                     heart_collected = False
                                 throw_rope = False
                                 wire_on = True
@@ -1526,6 +1539,31 @@ async def main ():
                         frame_counter = 0
                         current_text = ""
                         tut_screen = False
+
+                        if scene == 4 and tut_track[8] == False:
+                            idx = 8
+                            char_index = 0    
+                            frame_counter = 0
+                            current_text = ""
+                            tut_screen = True
+                        elif scene == 4 and tut_track[9] == False:
+                            idx = 9
+                            char_index = 0    
+                            frame_counter = 0
+                            current_text = ""
+                            tut_screen = True
+                        elif scene == 4 and tut_track[10] == False:
+                            idx = 10
+                            char_index = 0    
+                            frame_counter = 0
+                            current_text = ""
+                            tut_screen = True 
+                        elif scene == 4 and tut_track[11] == False:
+                            idx = 11
+                            char_index = 0    
+                            frame_counter = 0
+                            current_text = ""
+                            tut_screen = True                              
                 
 
                 if scene == 0 and start == True:
@@ -1567,12 +1605,10 @@ async def main ():
                 current_time = pygame.time.get_ticks()
 
                 # Darkness
+                mood = (9 - lives)
                 darkness(mood)
 
 
-                # Reset Button
-                reset_button = RESET.get_rect(topleft = (15, 15))
-                screen.blit(RESET, reset_button)
 
                 # Snow
                 if scene > 3:
@@ -1602,9 +1638,14 @@ async def main ():
                     
 
                 # TUT
-                if scene <= 4:
+                if scene < 4:
                     if tut_screen == True:
                         char_index, frame_counter, current_text = tutorial(tut_text, idx, tut_track, char_index, frame_counter, current_text)
+                elif scene == 4:
+                    if tut_screen == True:
+                        screen.fill(BLACK)
+                        char_index, frame_counter, current_text = tutorial(tut_text, idx, tut_track, char_index, frame_counter, current_text)
+
 
                 if scene == 3 and grounded == True and tut_track[6] == False:
                     char_index = 0    
@@ -1636,7 +1677,8 @@ async def main ():
 
                 keys = pygame.key.get_pressed()
 
-                player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys, idle)
+                if not (scene == 4 and tut_screen == True):
+                    player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys, idle)
                 
         
 
@@ -1651,7 +1693,7 @@ async def main ():
             
             # MOVE 
                 if tut_screen != True:     
-                    character, animate_time, frame = player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys, idle)  
+                    character, animate_time, frame, sprite = player(jumped, swing, walking_l, walking_r, animate_time, touch_rope, frame, x, y, angle, keys, idle)  
                     grounded, x, y, swing, jumped, time, throw_rope, no_move, walking_l, walking_r, idle = player_move(x, y, grounded, keys, rope_points, swing, jumped, dt, time, throw_rope, no_move, touch_rope, touch_x, touch_y, walking_l, walking_r, idle)
                     grounded, x, y, scene, x_velocity, y_velocity, jumped, throw_rope, wire_on = physics(x_velocity, y_velocity, x, y, grounded, jumped, scene, touch_rope, throw_rope, wire_on)
 
@@ -1725,6 +1767,8 @@ async def main ():
                     if detection.clipline(start_point, end_point):
                             x = 435 
                             y = 295 + ((SEGMENTS-2) * SEGMENT_LENGTH)
+                            end = True
+
                            # coin_yes = True
                           #  order = 6
 
@@ -1760,7 +1804,13 @@ async def main ():
 
             # Lives
                 if hit_barrier == True:
-                    if life == False: 
+                    if life == False:
+                        # Flash Sprite
+                        tinted_image = sprite.copy()
+                        color_surface = pygame.Surface(tinted_image.get_size(), pygame.SRCALPHA)
+                        color_surface.fill((255, 0, 0))
+                        tinted_image.blit(color_surface, (x,y), special_flags=pygame.BLEND_RGBA_MULT) 
+
                         lives = lose_life(lives)
                         life = True
                 else:
@@ -1845,6 +1895,10 @@ async def main ():
                 # Coin Count Display
                 count(coin_count)
 
+                # Reset Button
+                reset_button = RESET.get_rect(topleft = (15, 15))
+                screen.blit(RESET, reset_button)
+
                 # Hearts
                 heart(lives)
 
@@ -1915,6 +1969,42 @@ async def main ():
         else:
             screen.fill(BLACK)
             draw_text("GAME OVER", 230, 400)
+
+
+
+        # Ending
+        if end == True:
+            end_scene = [""]
+            screen.fill(BLACK)
+            frame_counter += 1
+            if frame_counter >= 5:
+                frame_counter = 0  
+                move_end += 1
+            if current_line < len(end_scene):
+                target_text = end_scene[current_line]
+
+                if char_index < len(target_text):
+                    frame_counter += 1
+                    if frame_counter >= 5:
+                        frame_counter = 0  
+                        char_index += 1    
+                        current_text = target_text[:char_index]
+                else: 
+                    completed_lines.append(target_text)
+                    current_line += 1
+                    char_index = 0
+                    current_text = ""
+
+            for i in range(len(completed_lines)):
+                draw_text(completed_lines[i], 20, 20 + (i * 80))
+
+            if current_text != "" and current_line < len(end_scene):
+                draw_text(current_text, 20, 20 + (current_line * 80))
+            print(move_end)
+            if move_end > 16:
+                move_end = 16
+            screen.blit(BAD_END, (0, -SCREEN_HEIGHT + (50 * move_end)))
+            
             
         pygame.display.flip()
             

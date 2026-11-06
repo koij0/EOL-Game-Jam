@@ -5,4 +5,8 @@ Use ARROW KEYS to CLIMB & SWING
 Collect COINS!
 Grab ROPE & reposition with MOUSE to CLIMB
 There's a PHONE...
-Be careful of WIRES...you will lose a LIFE!
+Transferring to another LINE...
+Let's see where this one takes us...
+But be wary of WIRES, you will lose a LIFE!
+Note: RESTART level button in left corner
+TUTORIAL: POWERING OFF
