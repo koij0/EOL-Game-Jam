@@ -74,7 +74,7 @@ async def main ():
     frame = 0
 
     tut_track = []
-    tut_screen = False # CHEAT
+    tut_screen = False 
     idx = 0
 
     coin_count = 1
@@ -88,7 +88,7 @@ async def main ():
     life = False
     respawn = False
 
-    scene = 15
+    scene = 0
     time = 5
 
     x_rope = 0
@@ -302,24 +302,48 @@ async def main ():
     # Audio
 
     RINGTONE = pygame.mixer.Sound("sfx/ringtone.wav")
+    RINGTONE.set_volume(0.1)
 
     SFX_WALK1 = pygame.mixer.Sound("sfx/walk1.wav")
     SFX_WALK2 = pygame.mixer.Sound("sfx/walk2.wav")
+    SFX_WALK1.set_volume(0.2)
+    SFX_WALK2.set_volume(0.2)
     SFX_WALK = [SFX_WALK1, SFX_WALK2]
-  # SFX_JUMP = pygame.mixer.Sound("sfx/jump.wav")
+    
 
     SFX_THROW = pygame.mixer.Sound("sfx/throw.wav")
-
+    SFX_THROW.set_volume(0.4)
 
     SFX_COIN = pygame.mixer.Sound("sfx/coin.wav")
+    SFX_COIN.set_volume(0.6)
+
     SFX_USE_COIN = pygame.mixer.Sound("sfx/use_coin.wav")
+    SFX_USE_COIN.set_volume(0.6)
+
     SFX_BEEP = pygame.mixer.Sound("sfx/beep.wav")
+    SFX_BEEP.set_volume(0.5)
+
     SFX_CLICK = pygame.mixer.Sound("sfx/click.wav")
+    SFX_CLICK.set_volume(0.5)
+
     SFX_GET_LIFE = pygame.mixer.Sound("sfx/get_life.wav")
+    SFX_GET_LIFE.set_volume(1)
+
     SFX_LOSE_LIFE = pygame.mixer.Sound("sfx/lose_life.wav")
+    SFX_LOSE_LIFE.set_volume(1)
+
+    SFX_CLIMB = pygame.mixer.Sound("sfx/climb.wav")
+    SFX_CLIMB.set_volume(0.3)
+
+    SFX_ALERT = pygame.mixer.Sound("sfx/alert.wav")
+    SFX_ALERT.set_volume(0.7)
 
 
-    
+    # Ambiance - Background
+    pygame.mixer.music.load("eol.wav")
+    pygame.mixer.music.set_volume(0.03)
+    pygame.mixer.music.play(-1)
+
 
 
 
@@ -363,6 +387,8 @@ async def main ():
 # TUTORIAL
     def tutorial(tut_text, idx, tut_track, char_index, frame_counter, current_text):
         screen.blit(CHATBOX, (120, 260))
+        if tut_track[idx] == False:
+            SFX_ALERT.play()
         if idx < len(tut_text):
             target_text = tut_text[idx]
             
@@ -410,13 +436,14 @@ async def main ():
             character = player_rotated.get_rect(topleft = (x, y))
             screen.blit(player_rotated, character)
             sprite = player_rotated
+          #  SFX_CLIMB.play()
 
         elif touch_rope == True and keys[pygame.K_SPACE]:
             character = PLAYER_CLIMB.get_rect(topleft = (x, y)) 
             screen.blit(PLAYER_CLIMB, character)
             sprite = PLAYER_CLIMB
-        elif jumped == True: # or grounded == False:
-          #  SFX_JUMP.play()
+         #   SFX_CLIMB.play()
+        elif jumped == True: 
             character = PLAYER_JUMP.get_rect(topleft = (x, y)) 
             screen.blit(PLAYER_JUMP, character)
         elif walking_l == True or walking_r == True:
