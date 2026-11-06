@@ -6,13 +6,16 @@
 # source venv313/bin/activate
 # ./venv313/bin/python main.py
 
+# Compile
+# python3.13 -m pygbag --build --disable-sound-format-error main.py
+# Local
+# python3.13 -m pygbag --disable-sound-format-error main.py
+
 
 
 # IMPORTS
 import pygame
 import sys
-from shapely.geometry import Polygon
-
 
 import random
 import math
@@ -21,6 +24,27 @@ import os
 
 # For WebAssembly
 import asyncio
+
+
+# Polygon Class
+class Polygon:
+    def __init__(self, points):
+        self.points = list(points)
+
+    def contains_point(self, x, y):
+        inside = False
+        n = len(self.points)
+        p1x, p1y = self.points[0]
+        for i in range(1, n + 1):
+            p2x, p2y = self.points[i % n]
+            if min(p1y, p2y) < y <= max(p1y, p2y) and x <= max(p1x, p2x):
+                xinters = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x if p1y != p2y else p1x
+                if p1x == p2x or x <= xinters:
+                    inside = not inside
+            p1x, p1y = p2x, p2y
+        return inside
+
+
 
 async def main ():
 
@@ -340,9 +364,9 @@ async def main ():
 
 
     # Ambiance - Background
-    pygame.mixer.music.load("eol.wav")
-    pygame.mixer.music.set_volume(0.03)
-    pygame.mixer.music.play(-1)
+    # pygame.mixer.music.load("eol.wav")
+    # pygame.mixer.music.set_volume(0.03)
+    # pygame.mixer.music.play(-1)
 
 
 
@@ -1272,8 +1296,7 @@ async def main ():
 
         for structure in structures:
             if isinstance(structure, Polygon):
-                point = list(structure.exterior.coords)
-                pygame.draw.polygon(screen, BLACK, point)
+                pygame.draw.polygon(screen, BLACK, structure.points)
             else: 
                 pygame.draw.rect(screen, BLACK, structure)
 
