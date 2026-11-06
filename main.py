@@ -88,7 +88,7 @@ async def main ():
     life = False
     respawn = False
 
-    scene = 16
+    scene = 15
     time = 5
 
     x_rope = 0
@@ -155,6 +155,7 @@ async def main ():
     end = False
     move_end = 0
     credits = False
+    rising_sun = 0
 
 
 # FILES
@@ -217,6 +218,12 @@ async def main ():
 
     BAD_END = pygame.image.load("backgrounds/bad_end.png").convert_alpha()
     BAD_END = pygame.transform.scale(BAD_END, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    GOOD_END = pygame.image.load("backgrounds/good_end.png").convert_alpha()
+    GOOD_END = pygame.transform.scale(GOOD_END, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    ROCKS = pygame.image.load("sprites/rocks.png").convert_alpha()
+    ROCKS = pygame.transform.scale(ROCKS, (SCREEN_WIDTH + 10, 251))
     
     # CHAT BOX - For Tutorial
     CHATBOX = pygame.image.load("sprites/chatbox.png").convert_alpha()
@@ -1480,7 +1487,7 @@ async def main ():
                             scene = 16
                         else: 
                             start = None
-                            credits = True
+                            end = False
                             
                             
                         
@@ -1529,9 +1536,9 @@ async def main ():
                         current_line = 0
                         completed_lines = []
 
-                if end == True:
+                if end != None:
                     if event.key == pygame.K_RETURN:
-                        end = False
+                        end = None
                         char_index = 0
                         frame_counter = 0
                         current_text = ""
@@ -1903,7 +1910,7 @@ async def main ():
                         if phone_ringing == False:
                             RINGTONE.play(-1)  
                             phone_ringing = True
-                        order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines, line_x, p, prev_x, prev_y, base_y, wave_points = phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines, line_x, ending, p, prev_x, prev_y, base_y, wave_points) 
+                        order, phone_answer, lives, current_line, char_index, frame_counter, current_text, completed_lines = phone_call(order, phone_script, phone_answer, lives, char_index, frame_counter, current_text, current_line, completed_lines) 
                         if phone_answer != None:
                             RINGTONE.stop()
                             phone_ringing = False
@@ -1937,7 +1944,7 @@ async def main ():
 
 
         # Ending
-        if end == True:
+        if end == True: # BAD
             end_scene = ["Hello. This is the Suicide & Crisis Lifeline.                       ", 
                          "We were speaking earlier and got disconnected.                       ", 
                          "Please feel free to call back at 800-273-8255.                       ", 
@@ -1972,6 +1979,53 @@ async def main ():
                     wrap(screen, current_text, font, WHITE, 185, 375, 70)    
                 elif current_line == len(end_scene):
                     draw_text("RETURN", 250, 420)    
+
+        elif end == False: # GOOD
+            screen.blit(GOOD_END, (2, 0))
+
+            
+            frame_counter += 1
+            if frame_counter >= 7:
+                frame_counter = 0
+                rising_sun += 1
+            if rising_sun > 160:
+                rising_sun = 160
+            dark = pygame.Surface((600, 800))
+            dark.fill((200-(8*10), 200-(8*10), 200-(8*10)))
+            pygame.draw.circle(dark, GOLD, (300, 800), (50+(rising_sun*5)))
+            screen.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_MULT) 
+
+            # Rocks
+            screen.blit(ROCKS, (0, 550))
+
+            end_scene = ["And the sun will rise again."]
+            if current_line < len(end_scene):
+                    target_text = end_scene[current_line]
+ 
+                    if char_index < len(target_text):
+                        frame_counter += 1
+                        if frame_counter >= 7:
+                            frame_counter = 0  
+                            char_index += 1    
+                            current_text = target_text[:char_index]
+                    else: 
+                        completed_lines.append(target_text)
+                        current_line += 1
+                        char_index = 0
+                        current_text = ""
+                                    
+            for i in range(len(completed_lines)):
+                wrap(screen, completed_lines[i], font, WHITE, 10, 710, 70)
+                
+                 
+            if current_text != "" and current_line < len(end_scene):
+                wrap(screen, current_text, font, WHITE, 10, 710, 70)   
+
+
+            if rising_sun == 160:
+                draw_text("RETURN", 450, 720)               
+
+
 
 
 
